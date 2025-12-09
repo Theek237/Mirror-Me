@@ -1,11 +1,11 @@
 import 'package:cloud_firestore/cloud_firestore.dart';
 import 'package:firebase_auth/firebase_auth.dart';
 import 'package:get_it/get_it.dart';
-import 'package:google_sign_in/google_sign_in.dart';
+// import 'package:google_sign_in/google_sign_in.dart';
 import 'package:mm/features/auth/data/datasources/auth_remote_data_source.dart';
 import 'package:mm/features/auth/data/reoisitories/auth_repository_impl.dart';
 import 'package:mm/features/auth/domain/repositiories/auth_repository.dart';
-import 'features/auth/presentation/bloc/auth_bloc.dart';
+import 'package:mm/features/auth/presentation/bloc/auth%20bloc/auth_bloc.dart';
 
 //Service Locator
 final sl = GetIt.instance;
@@ -24,7 +24,7 @@ Future<void> init() async {
   sl.registerLazySingleton<AuthRemoteDataSource>(
     () => AuthRemoteDataSourceImpl(
       firebaseAuth: sl(),
-      googleSignIn: sl(),
+      // googleSignIn: sl(),
       firestore: sl(),
     )
   );

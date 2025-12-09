@@ -1,25 +1,25 @@
 import 'package:cloud_firestore/cloud_firestore.dart';
 import 'package:firebase_auth/firebase_auth.dart';
 import 'package:mm/features/auth/data/models/user_model.dart';
-import 'package:google_sign_in/google_sign_in.dart';
+// import 'package:google_sign_in/google_sign_in.dart';
 
 
 abstract class AuthRemoteDataSource {
   Future<UserModel> loginWithEmail(String email, String password);
   Future<UserModel> registerWithEmail(String email, String password, String name);
-  Future<UserModel> loginWithGoogle();
+  // Future<UserModel> loginWithGoogle();
   Future<void> logout();
   Future<UserModel?> getCurrentUser();
 }
 
 class AuthRemoteDataSourceImpl implements AuthRemoteDataSource{
   final FirebaseAuth firebaseAuth;
-  final GoogleSignIn googleSignIn;
+  // final GoogleSignIn googleSignIn;
   final FirebaseFirestore firestore;
 
   AuthRemoteDataSourceImpl({
     required this.firebaseAuth,
-    required this.googleSignIn,
+    // this.googleSignIn,
     required this.firestore,
   });
 
@@ -50,17 +50,16 @@ class AuthRemoteDataSourceImpl implements AuthRemoteDataSource{
     return UserModel.fromFirebaseUser(userCredential.user!);  
   }
 
-  @override
-  Future<UserModel> loginWithGoogle() {
-    // TODO: implement loginWithGoogle
-    throw UnimplementedError();
-  }
+  // @override
+  // Future<UserModel> loginWithGoogle() {
+  //   // TODO: implement loginWithGoogle
+  //   throw UnimplementedError();
+  // }
 
   @override
   Future<void> logout() async{
-    await googleSignIn.signOut();
     await firebaseAuth.signOut();
-  }
+  } //await googleSignIn.signOut();
 
   @override
   Future<UserModel?> getCurrentUser() async {

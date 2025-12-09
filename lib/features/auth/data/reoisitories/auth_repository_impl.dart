@@ -28,15 +28,15 @@ class AuthRepositoryImpl implements AuthRepository{
     }
   }
 
-  @override
-  Future<Either<Failure, UserEntity>> loginWithGoogle() async{
-    try{
-      final user = await remoteDataSource.loginWithGoogle();
-      return Right(user);
-    }catch(e){
-      return Left(ServerFailure(e.toString()));
-    }
-  }
+  // @override
+  // Future<Either<Failure, UserEntity>> loginWithGoogle() async{
+  //   try{
+  //     final user = await remoteDataSource.loginWithGoogle();
+  //     return Right(user);
+  //   }catch(e){
+  //     return Left(ServerFailure(e.toString()));
+  //   }
+  // }
 
   @override
   Future<void> logout() async {

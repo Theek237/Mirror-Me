@@ -5,18 +5,13 @@ class UserClothingItem extends TryOnItem{
   final String color;
 
   UserClothingItem({
-    required String itemId,
-    required String name,
-    required String imageUrl,
-    required ClothingCategory category,
+    required super.itemId,
+    required super.name,
+    required super.imageUrl,
+    required super.category,
     required this.userId,
     required this.color,
-  }) : super(
-          itemId: itemId,
-          name: name,
-          imageUrl: imageUrl,
-          category: category,
-        );
+  });
         
   @override
   Map<String, dynamic> toMap() {
