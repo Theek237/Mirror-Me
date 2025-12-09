@@ -1,6 +1,6 @@
 {
-    "name": "mirror_me",
-    "short_name": "mirror_me",
+    "name": "mm",
+    "short_name": "mm",
     "start_url": ".",
     "display": "standalone",
     "background_color": "#0175C2",

@@ -1,4 +1,4 @@
-package com.example.mirror_me
+package com.example.mm
 
 import io.flutter.embedding.android.FlutterActivity
 
