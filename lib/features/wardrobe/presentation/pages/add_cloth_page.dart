@@ -18,9 +18,16 @@ class _AddClothPageState extends State<AddClothPage> {
   File? _selectedImage;
   String _selectedCategory = 'T-Shirt';
 
-  final List<String> _categories = ['T-Shirt','Shirt','Trousers','Dress','Shoes','Other'];
+  final List<String> _categories = [
+    'T-Shirt',
+    'Shirt',
+    'Trousers',
+    'Dress',
+    'Shoes',
+    'Other',
+  ];
 
-  Future<void> _pickImage(ImageSource source) async{
+  Future<void> _pickImage(ImageSource source) async {
     final picker = ImagePicker();
     final pickedFile = await picker.pickImage(
       source: source,
@@ -29,7 +36,7 @@ class _AddClothPageState extends State<AddClothPage> {
       imageQuality: 85,
     );
 
-    if (pickedFile != null){
+    if (pickedFile != null) {
       setState(() {
         _selectedImage = File(pickedFile.path);
       });
@@ -39,19 +46,20 @@ class _AddClothPageState extends State<AddClothPage> {
   @override
   Widget build(BuildContext context) {
     return Scaffold(
-      appBar: AppBar(
-        title: const Text('Add Cloth'),
-      ),
+      appBar: AppBar(title: const Text('Add Cloth')),
 
       body: BlocListener<WardrobeBloc, WardrobeState>(
         listener: (context, state) {
           if (state is WardrobeErrorState) {
+            ScaffoldMessenger.of(
+              context,
+            ).showSnackBar(SnackBar(content: Text(state.message)));
+          } else if (state is WardrobeLoadedState) {
             ScaffoldMessenger.of(context).showSnackBar(
-              SnackBar(content: Text(state.message)),
-            );
-          } else if (state is WardrobeLoadedState){
-            ScaffoldMessenger.of(context).showSnackBar(
-              SnackBar(content: Text("Item Added Sucessfully!"),backgroundColor: Colors.green,)
+              SnackBar(
+                content: Text("Item Added Sucessfully!"),
+                backgroundColor: Colors.green,
+              ),
             );
             Navigator.pop(context);
           }
@@ -99,19 +107,29 @@ class _AddClothPageState extends State<AddClothPage> {
                       borderRadius: BorderRadius.circular(12.0),
                       border: Border.all(color: Colors.grey),
                     ),
-                    child: _selectedImage != null 
-                     ? ClipRRect(
-                        borderRadius:BorderRadius.circular(12.0),
-                        child: Image.file(_selectedImage!,fit: BoxFit.cover,),
-                     )
-                     : const Column(
-                        mainAxisAlignment: MainAxisAlignment.center,
-                        children: [
-                          Icon(Icons.add_a_photo, size: 50, color: Colors.grey),
-                          SizedBox(height: 8.0),
-                          Text('Tap to select an image', style: TextStyle(color: Colors.grey)),
-                        ],
-                     ),
+                    child: _selectedImage != null
+                        ? ClipRRect(
+                            borderRadius: BorderRadius.circular(12.0),
+                            child: Image.file(
+                              _selectedImage!,
+                              fit: BoxFit.cover,
+                            ),
+                          )
+                        : const Column(
+                            mainAxisAlignment: MainAxisAlignment.center,
+                            children: [
+                              Icon(
+                                Icons.add_a_photo,
+                                size: 50,
+                                color: Colors.grey,
+                              ),
+                              SizedBox(height: 8.0),
+                              Text(
+                                'Tap to select an image',
+                                style: TextStyle(color: Colors.grey),
+                              ),
+                            ],
+                          ),
                   ),
                 ),
 
@@ -120,11 +138,9 @@ class _AddClothPageState extends State<AddClothPage> {
                 //Name Input
                 TextFormField(
                   controller: _nameController,
-                  decoration: const InputDecoration(
-                    labelText: 'Cloth Name',
-                  ),
-                  validator: (value){
-                    if(value == null || value.isEmpty){
+                  decoration: const InputDecoration(labelText: 'Cloth Name'),
+                  validator: (value) {
+                    if (value == null || value.isEmpty) {
                       return 'Please enter a name';
                     }
                     return null;
@@ -136,11 +152,11 @@ class _AddClothPageState extends State<AddClothPage> {
                 //Category Dropdown
                 DropdownButtonFormField(
                   initialValue: _selectedCategory,
-                  items: _categories.map((String category){
+                  items: _categories.map((String category) {
                     return DropdownMenuItem(
                       value: category,
                       child: Text(category),
-                      );
+                    );
                   }).toList(),
                   onChanged: (newValue) {
                     setState(() {
@@ -154,20 +170,26 @@ class _AddClothPageState extends State<AddClothPage> {
                 //Save Button
                 BlocBuilder<WardrobeBloc, WardrobeState>(
                   builder: (context, state) {
-                    if(state is WardrobeLoadingState){
+                    if (state is WardrobeLoadingState) {
                       return const CircularProgressIndicator();
                     }
                     return ElevatedButton(
                       style: ElevatedButton.styleFrom(
                         padding: const EdgeInsets.symmetric(vertical: 16),
                         backgroundColor: Colors.deepPurple,
-                        foregroundColor: Colors.white
+                        foregroundColor: Colors.white,
+                        fixedSize: Size(
+                          MediaQuery.of(context).size.width - 50,
+                          60,
+                        ),
                       ),
                       onPressed: () {
-                        if(_formKey.currentState!.validate()){
-                          if(_selectedImage == null){
+                        if (_formKey.currentState!.validate()) {
+                          if (_selectedImage == null) {
                             ScaffoldMessenger.of(context).showSnackBar(
-                              const SnackBar(content: Text('Please select an image')),
+                              const SnackBar(
+                                content: Text('Please select an image'),
+                              ),
                             );
                             return;
                           }
@@ -177,21 +199,20 @@ class _AddClothPageState extends State<AddClothPage> {
                               userId: widget.userId,
                               name: _nameController.text,
                               category: _selectedCategory,
-                              imageFile: _selectedImage!
+                              imageFile: _selectedImage!,
                             ),
                           );
                         }
                       },
-                      child: const Text('Save to Wardrobe'),
-                    ); 
+                      child: const Text('Save Item'),
+                    );
                   },
                 ),
-
               ],
-            )
-          ),  
-        )
-        )
-      );
+            ),
+          ),
+        ),
+      ),
+    );
   }
 }

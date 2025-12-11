@@ -1,7 +1,6 @@
 import 'package:flutter/material.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
 import 'package:mm/features/auth/presentation/bloc/auth%20bloc/auth_bloc.dart';
-import 'package:mm/features/wardrobe/presentation/pages/add_cloth_page.dart';
 import 'package:mm/features/wardrobe/presentation/pages/wardrobe_page.dart';
 
 class HomePage extends StatelessWidget {
@@ -33,7 +32,7 @@ class HomePage extends StatelessWidget {
               onPressed: () {
                 Navigator.push(
                   context,
-                  MaterialPageRoute(builder: (context) => AddClothPage(userId: user.uid),)
+                  MaterialPageRoute(builder: (context) => WardrobePage(userId: user.uid,)),
                 );
               },
               label: Text("Go to my Wardrobe"),

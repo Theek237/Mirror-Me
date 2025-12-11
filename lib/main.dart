@@ -8,11 +8,8 @@ import 'package:mm/firebase_options.dart';
 import 'injection_container.dart' as di;
 
 void main() async {
-
   WidgetsFlutterBinding.ensureInitialized();
-  await Firebase.initializeApp(
-    options: DefaultFirebaseOptions.currentPlatform,
-  );
+  await Firebase.initializeApp(options: DefaultFirebaseOptions.currentPlatform);
 
   //Initialize Dependency Injection
   await di.init();
@@ -27,7 +24,9 @@ class MyApp extends StatelessWidget {
   Widget build(BuildContext context) {
     return MultiBlocProvider(
       providers: [
-        BlocProvider(create: (_) => di.sl<AuthBloc>()..add(AuthCheckRequested())),
+        BlocProvider(
+          create: (_) => di.sl<AuthBloc>()..add(AuthCheckRequested()),
+        ),
         BlocProvider(create: (_) => di.sl<WardrobeBloc>()),
       ],
       child: MaterialApp(

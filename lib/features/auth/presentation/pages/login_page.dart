@@ -17,11 +17,14 @@ class _LoginPageState extends State<LoginPage> {
   @override
   Widget build(BuildContext context) {
     return Scaffold(
-      body: BlocListener<AuthBloc,AuthState>(
+      body: BlocListener<AuthBloc, AuthState>(
         listener: (context, state) {
-          if (state is AuthError){
+          if (state is AuthError) {
             ScaffoldMessenger.of(context).showSnackBar(
-              SnackBar(content: Text(state.message),backgroundColor: Colors.red,)
+              SnackBar(
+                content: Text(state.message),
+                backgroundColor: Colors.red,
+              ),
             );
           }
         },
@@ -34,7 +37,14 @@ class _LoginPageState extends State<LoginPage> {
                 mainAxisAlignment: MainAxisAlignment.center,
                 crossAxisAlignment: CrossAxisAlignment.stretch,
                 children: [
-                  const Text("Welcome Back", style: TextStyle(fontSize: 32.0, fontWeight: FontWeight.bold), textAlign: TextAlign.center,),
+                  const Text(
+                    "Welcome Back",
+                    style: TextStyle(
+                      fontSize: 32.0,
+                      fontWeight: FontWeight.bold,
+                    ),
+                    textAlign: TextAlign.center,
+                  ),
                   const SizedBox(height: 32.0),
                   TextFormField(
                     controller: _emailController,
@@ -43,8 +53,8 @@ class _LoginPageState extends State<LoginPage> {
                       prefixIcon: Icon(Icons.email),
                     ),
                     keyboardType: TextInputType.emailAddress,
-                    validator: (value){
-                      if (value == null || value.isEmpty){
+                    validator: (value) {
+                      if (value == null || value.isEmpty) {
                         return "Please enter your email";
                       }
                       return null;
@@ -59,10 +69,10 @@ class _LoginPageState extends State<LoginPage> {
                       prefixIcon: Icon(Icons.lock),
                     ),
                     obscureText: true,
-                    validator: (value){
-                      if (value == null || value.isEmpty){
+                    validator: (value) {
+                      if (value == null || value.isEmpty) {
                         return "Please enter your password";
-                      } else if (value.length < 6){
+                      } else if (value.length < 6) {
                         return "Password must be at least 6 characters";
                       }
                       return null;
@@ -70,56 +80,62 @@ class _LoginPageState extends State<LoginPage> {
                   ),
 
                   const SizedBox(height: 24.0),
-          
-                  BlocBuilder<AuthBloc,AuthState>(builder: (context, state) {
-                    if (state is AuthLoading){
-                      return const Center(child: CircularProgressIndicator());
-                    }
-                    return ElevatedButton(
-                      style: ElevatedButton.styleFrom(
-                        padding: const EdgeInsets.symmetric(vertical: 16.0),
-                        backgroundColor: Colors.deepPurple,
-                        foregroundColor: Colors.white,
-                      ),
-                      onPressed: () {
-                        if (_formKey.currentState!.validate()) {
-                          context.read<AuthBloc>().add(
-                            AuthLoginRequested(
-                              email: _emailController.text.trim(),
-                              password: _passwordController.text.trim(),
-                            )
-                          );
-                        }
-                      },
-                      child: Text("Login"),
-                    );
-                  },),
-                  
-          
-                  const SizedBox(height: 16,),
-          
+
+                  BlocBuilder<AuthBloc, AuthState>(
+                    builder: (context, state) {
+                      if (state is AuthLoading) {
+                        return const Center(child: CircularProgressIndicator());
+                      }
+                      return ElevatedButton(
+                        style: ElevatedButton.styleFrom(
+                          padding: const EdgeInsets.symmetric(vertical: 16.0),
+                          backgroundColor: Colors.deepPurple,
+                          foregroundColor: Colors.white,
+                        ),
+                        onPressed: () {
+                          if (_formKey.currentState!.validate()) {
+                            context.read<AuthBloc>().add(
+                              AuthLoginRequested(
+                                email: _emailController.text.trim(),
+                                password: _passwordController.text.trim(),
+                              ),
+                            );
+                          }
+                        },
+                        child: Text("Login"),
+                      );
+                    },
+                  ),
+
+                  const SizedBox(height: 16),
+
                   OutlinedButton.icon(
                     style: OutlinedButton.styleFrom(
-                      padding: const EdgeInsets.symmetric(vertical: 16)
+                      padding: const EdgeInsets.symmetric(vertical: 16),
                     ),
-                    icon: Icon(Icons.g_mobiledata,size: 28,),
+                    icon: Icon(Icons.g_mobiledata, size: 28),
                     onPressed: () {
                       context.read<AuthBloc>().add(AuthGoogleLoginRequested());
                     },
-                    label: Text("Sign in With Google")
+                    label: Text("Sign in With Google"),
                   ),
-          
-                  const SizedBox(height: 16,),
-          
+
+                  const SizedBox(height: 16),
+
                   TextButton(
                     onPressed: () {
-                      Navigator.push(context, MaterialPageRoute(builder: (context) => const RegisterPage(),));
+                      Navigator.push(
+                        context,
+                        MaterialPageRoute(
+                          builder: (context) => const RegisterPage(),
+                        ),
+                      );
                     },
-                    child: Text("Don't Have Account? Register")
-                  )
+                    child: Text("Don't Have Account? Register"),
+                  ),
                 ],
-              )
               ),
+            ),
           ),
         ),
       ),
