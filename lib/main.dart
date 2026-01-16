@@ -2,6 +2,7 @@ import 'package:firebase_core/firebase_core.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
 import 'package:mm/features/auth/presentation/bloc/auth%20bloc/auth_bloc.dart';
+import 'package:mm/features/tryon/presentation/bloc/try_on_bloc.dart';
 import 'package:mm/features/wardrobe/presentation/bloc/wardrobe%20bloc/wardrobe_bloc.dart';
 import 'package:mm/features/auth/presentation/pages/auth_wrapper.dart';
 import 'package:mm/firebase_options.dart';
@@ -28,6 +29,7 @@ class MyApp extends StatelessWidget {
           create: (_) => di.sl<AuthBloc>()..add(AuthCheckRequested()),
         ),
         BlocProvider(create: (_) => di.sl<WardrobeBloc>()),
+        // BlocProvider(create: (_) => di.sl<TryOnBloc>()),
       ],
       child: MaterialApp(
         title: 'AI Virtual Wardrobe',
