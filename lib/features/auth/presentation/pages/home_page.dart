@@ -3,7 +3,12 @@ import 'package:flutter_bloc/flutter_bloc.dart';
 import 'package:mm/core/theme/app_theme.dart';
 import 'package:mm/features/auth/presentation/bloc/auth%20bloc/auth_bloc.dart';
 import 'package:mm/features/wardrobe/presentation/pages/wardrobe_page.dart';
+import 'package:mm/features/wardrobe/presentation/bloc/wardrobe%20bloc/wardrobe_bloc.dart';
 import 'package:mm/features/gallery/presentation/pages/gallery_page.dart';
+import 'package:mm/features/gallery/presentation/bloc/gallery_bloc.dart';
+import 'package:mm/features/tryon/presentation/pages/tryon_page.dart';
+import 'package:mm/features/tryon/presentation/bloc/tryon_bloc.dart';
+import 'package:mm/injection_container.dart' as di;
 
 class HomePage extends StatelessWidget {
   const HomePage({super.key});
@@ -139,7 +144,25 @@ class HomePage extends StatelessWidget {
                             icon: Icons.auto_fix_high_rounded,
                             color: const Color(0xFF0EA5E9),
                             onTap: () {
-                              _showComingSoon(context);
+                              Navigator.push(
+                                context,
+                                MaterialPageRoute(
+                                  builder: (context) => MultiBlocProvider(
+                                    providers: [
+                                      BlocProvider(
+                                        create: (_) => di.sl<TryOnBloc>(),
+                                      ),
+                                      BlocProvider(
+                                        create: (_) => di.sl<GalleryBloc>(),
+                                      ),
+                                      BlocProvider(
+                                        create: (_) => di.sl<WardrobeBloc>(),
+                                      ),
+                                    ],
+                                    child: TryOnPage(userId: user.uid),
+                                  ),
+                                ),
+                              );
                             },
                           ),
                         ),

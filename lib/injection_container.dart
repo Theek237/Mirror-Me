@@ -1,5 +1,6 @@
 import 'package:get_it/get_it.dart';
 import 'package:supabase_flutter/supabase_flutter.dart';
+import 'package:mm/core/constants/gemini_config.dart';
 import 'package:mm/features/auth/data/datasources/auth_remote_data_source.dart';
 import 'package:mm/features/auth/data/reoisitories/auth_repository_impl.dart';
 import 'package:mm/features/auth/domain/repositiories/auth_repository.dart';
@@ -16,6 +17,14 @@ import 'package:mm/features/wardrobe/data/datasources/wardrobe_remote_data_sourc
 import 'package:mm/features/wardrobe/data/repositories/wardrobe_repository_impl.dart';
 import 'package:mm/features/wardrobe/domain/repositories/wardrobe_repository.dart';
 import 'package:mm/features/wardrobe/presentation/bloc/wardrobe%20bloc/wardrobe_bloc.dart';
+import 'package:mm/features/tryon/data/datasources/gemini_remote_data_source.dart';
+import 'package:mm/features/tryon/data/datasources/tryon_remote_data_source.dart';
+import 'package:mm/features/tryon/data/repositories/tryon_repository_impl.dart';
+import 'package:mm/features/tryon/domain/repositories/tryon_repository.dart';
+import 'package:mm/features/tryon/domain/usecases/generate_tryon.dart';
+import 'package:mm/features/tryon/domain/usecases/get_tryon_results.dart';
+import 'package:mm/features/tryon/domain/usecases/save_tryon_result.dart';
+import 'package:mm/features/tryon/presentation/bloc/tryon_bloc.dart';
 
 //Service Locator
 final sl = GetIt.instance;
@@ -85,15 +94,30 @@ Future<void> init() async {
   //----------------------------------------------------//
   //TryOn Feature
   //BLoC
-  // sl.registerFactory(() => TryOnBloc(tryOnRepository: sl()));
+  sl.registerFactory(
+    () => TryOnBloc(
+      generateTryOn: sl(),
+      saveTryOnResult: sl(),
+      getTryOnResults: sl(),
+    ),
+  );
 
-  // //Repository
-  // sl.registerLazySingleton<TryOnRepository>(
-  //   () => TryOnRepositoryImpl(remoteDataSource: sl()),
-  // );
+  //Use Cases
+  sl.registerLazySingleton(() => GenerateTryOn(sl()));
+  sl.registerLazySingleton(() => SaveTryOnResult(sl()));
+  sl.registerLazySingleton(() => GetTryOnResults(sl()));
 
-  // //Data Source
-  // sl.registerLazySingleton<TryOnRemoteDataSource>(
-  //   () => TryOnRemoteDataSourceImpl(),
-  // );
+  //Repository
+  sl.registerLazySingleton<TryOnRepository>(
+    () => TryOnRepositoryImpl(geminiDataSource: sl(), tryOnDataSource: sl()),
+  );
+
+  //Data Sources
+  sl.registerLazySingleton<GeminiRemoteDataSource>(
+    () => GeminiRemoteDataSourceImpl(apiKey: GeminiConfig.apiKey),
+  );
+
+  sl.registerLazySingleton<TryOnRemoteDataSource>(
+    () => TryOnRemoteDataSourceImpl(supabaseClient: sl()),
+  );
 }
