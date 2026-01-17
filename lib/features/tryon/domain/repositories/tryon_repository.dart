@@ -25,6 +25,17 @@ abstract class TryOnRepository {
   /// Gets all try-on results for a user
   Future<Either<Failure, List<TryOnResult>>> getTryOnResults(String userId);
 
+  /// Gets favorite try-on results for a user
+  Future<Either<Failure, List<TryOnResult>>> getFavoriteTryOnResults(
+    String userId,
+  );
+
+  /// Toggles favorite status for a try-on result
+  Future<Either<Failure, TryOnResult>> toggleFavorite(
+    String resultId,
+    bool isFavorite,
+  );
+
   /// Deletes a try-on result
   Future<Either<Failure, void>> deleteTryOnResult(String resultId);
 }

@@ -5,6 +5,7 @@ import 'package:mm/features/tryon/domain/entities/tryon_result.dart';
 import 'package:mm/features/tryon/domain/usecases/generate_tryon.dart';
 import 'package:mm/features/tryon/domain/usecases/get_tryon_results.dart';
 import 'package:mm/features/tryon/domain/usecases/save_tryon_result.dart';
+import 'package:mm/features/tryon/domain/usecases/toggle_tryon_favorite.dart';
 
 part 'tryon_event.dart';
 part 'tryon_state.dart';
@@ -13,15 +14,18 @@ class TryOnBloc extends Bloc<TryOnEvent, TryOnState> {
   final GenerateTryOn generateTryOn;
   final SaveTryOnResult saveTryOnResult;
   final GetTryOnResults getTryOnResults;
+  final ToggleTryOnFavorite toggleTryOnFavorite;
 
   TryOnBloc({
     required this.generateTryOn,
     required this.saveTryOnResult,
     required this.getTryOnResults,
+    required this.toggleTryOnFavorite,
   }) : super(const TryOnInitialState()) {
     on<TryOnGenerateEvent>(_onGenerate);
     on<TryOnSaveResultEvent>(_onSaveResult);
     on<TryOnLoadResultsEvent>(_onLoadResults);
+    on<TryOnToggleFavoriteEvent>(_onToggleFavorite);
     on<TryOnResetEvent>(_onReset);
   }
 
@@ -80,6 +84,21 @@ class TryOnBloc extends Bloc<TryOnEvent, TryOnState> {
     result.fold(
       (failure) => emit(TryOnErrorState(message: failure.message)),
       (results) => emit(TryOnResultsLoadedState(results: results)),
+    );
+  }
+
+  Future<void> _onToggleFavorite(
+    TryOnToggleFavoriteEvent event,
+    Emitter<TryOnState> emit,
+  ) async {
+    final result = await toggleTryOnFavorite(
+      resultId: event.resultId,
+      isFavorite: event.isFavorite,
+    );
+
+    result.fold(
+      (failure) => emit(TryOnErrorState(message: failure.message)),
+      (updatedResult) => emit(TryOnFavoriteToggledState(result: updatedResult)),
     );
   }
 

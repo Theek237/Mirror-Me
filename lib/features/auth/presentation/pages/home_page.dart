@@ -8,6 +8,8 @@ import 'package:mm/features/gallery/presentation/pages/gallery_page.dart';
 import 'package:mm/features/gallery/presentation/bloc/gallery_bloc.dart';
 import 'package:mm/features/tryon/presentation/pages/tryon_page.dart';
 import 'package:mm/features/tryon/presentation/bloc/tryon_bloc.dart';
+import 'package:mm/features/recommendations/presentation/pages/recommendations_page.dart';
+import 'package:mm/features/recommendations/presentation/bloc/recommendation_bloc.dart';
 import 'package:mm/injection_container.dart' as di;
 
 class HomePage extends StatelessWidget {
@@ -32,96 +34,170 @@ class HomePage extends StatelessWidget {
         return Scaffold(
           backgroundColor: AppTheme.backgroundColor,
           body: SafeArea(
-            child: SingleChildScrollView(
-              child: Padding(
-                padding: const EdgeInsets.symmetric(horizontal: 20),
-                child: Column(
-                  crossAxisAlignment: CrossAxisAlignment.start,
-                  children: [
-                    const SizedBox(height: 20),
-
-                    // Header Row
-                    Row(
+            child: CustomScrollView(
+              slivers: [
+                // App Bar
+                SliverToBoxAdapter(
+                  child: Padding(
+                    padding: const EdgeInsets.fromLTRB(24, 20, 24, 0),
+                    child: Row(
                       mainAxisAlignment: MainAxisAlignment.spaceBetween,
                       children: [
-                        // Greeting
                         Column(
                           crossAxisAlignment: CrossAxisAlignment.start,
                           children: [
                             Text(
                               "Hey, $firstName 👋",
                               style: const TextStyle(
-                                fontSize: 26,
+                                fontSize: 28,
                                 fontWeight: FontWeight.w800,
                                 color: AppTheme.primaryColor,
                                 letterSpacing: -0.5,
                               ),
                             ),
-                            const SizedBox(height: 2),
+                            const SizedBox(height: 4),
                             Text(
-                              "What will you try today?",
+                              "Let's style your day",
                               style: TextStyle(
-                                fontSize: 14,
+                                fontSize: 15,
                                 color: AppTheme.textSecondary,
                               ),
                             ),
                           ],
                         ),
-                        // Logout Button
                         GestureDetector(
-                          onTap: () => _showLogoutSheet(context),
+                          onTap: () => _showProfileSheet(context),
                           child: Container(
-                            width: 48,
-                            height: 48,
+                            width: 50,
+                            height: 50,
                             decoration: BoxDecoration(
-                              color: AppTheme.accentColor,
-                              borderRadius: BorderRadius.circular(14),
-                              border: Border.all(
-                                color: AppTheme.primaryColor.withOpacity(0.1),
+                              gradient: LinearGradient(
+                                colors: [
+                                  AppTheme.primaryColor,
+                                  AppTheme.primaryColor.withOpacity(0.8),
+                                ],
+                                begin: Alignment.topLeft,
+                                end: Alignment.bottomRight,
                               ),
+                              borderRadius: BorderRadius.circular(16),
                             ),
-                            child: const Icon(
-                              Icons.logout_rounded,
-                              color: AppTheme.primaryColor,
-                              size: 22,
+                            child: Center(
+                              child: Text(
+                                firstName[0].toUpperCase(),
+                                style: const TextStyle(
+                                  color: Colors.white,
+                                  fontSize: 20,
+                                  fontWeight: FontWeight.w700,
+                                ),
+                              ),
                             ),
                           ),
                         ),
                       ],
                     ),
+                  ),
+                ),
 
-                    const SizedBox(height: 32),
-
-                    // Main Feature Card - Wardrobe
-                    _buildMainCard(
-                      context,
-                      title: "My Wardrobe",
-                      subtitle: "Your clothing collection",
-                      icon: Icons.checkroom_rounded,
-                      color: AppTheme.primaryColor,
-                      onTap: () {
-                        Navigator.push(
-                          context,
-                          MaterialPageRoute(
-                            builder: (context) =>
-                                WardrobePage(userId: user.uid),
-                          ),
-                        );
-                      },
-                    ),
-
-                    const SizedBox(height: 16),
-
-                    // Two column cards
-                    Row(
+                // Main Feature Cards
+                SliverToBoxAdapter(
+                  child: Padding(
+                    padding: const EdgeInsets.fromLTRB(24, 32, 24, 0),
+                    child: Column(
                       children: [
-                        // Gallery Card
+                        // Virtual Try-On Hero Card
+                        _buildHeroCard(
+                          context,
+                          title: "Virtual Try-On",
+                          subtitle: "See clothes on you with AI magic",
+                          icon: Icons.auto_fix_high_rounded,
+                          gradient: const LinearGradient(
+                            colors: [Color(0xFF667EEA), Color(0xFF764BA2)],
+                            begin: Alignment.topLeft,
+                            end: Alignment.bottomRight,
+                          ),
+                          onTap: () => _navigateToTryOn(context, user.uid),
+                        ),
+
+                        const SizedBox(height: 16),
+
+                        // AI Recommendations Card
+                        _buildHeroCard(
+                          context,
+                          title: "Style Advisor",
+                          subtitle: "Get AI-powered outfit recommendations",
+                          icon: Icons.auto_awesome,
+                          gradient: const LinearGradient(
+                            colors: [Color(0xFFF093FB), Color(0xFFF5576C)],
+                            begin: Alignment.topLeft,
+                            end: Alignment.bottomRight,
+                          ),
+                          onTap: () =>
+                              _navigateToRecommendations(context, user.uid),
+                        ),
+                      ],
+                    ),
+                  ),
+                ),
+
+                // Section: Your Collection
+                SliverToBoxAdapter(
+                  child: Padding(
+                    padding: const EdgeInsets.fromLTRB(24, 32, 24, 16),
+                    child: Row(
+                      children: [
+                        Container(
+                          width: 4,
+                          height: 20,
+                          decoration: BoxDecoration(
+                            color: AppTheme.secondaryColor,
+                            borderRadius: BorderRadius.circular(2),
+                          ),
+                        ),
+                        const SizedBox(width: 10),
+                        const Text(
+                          "Your Collection",
+                          style: TextStyle(
+                            fontSize: 18,
+                            fontWeight: FontWeight.w700,
+                            color: AppTheme.primaryColor,
+                          ),
+                        ),
+                      ],
+                    ),
+                  ),
+                ),
+
+                // Collection Cards Grid
+                SliverToBoxAdapter(
+                  child: Padding(
+                    padding: const EdgeInsets.symmetric(horizontal: 24),
+                    child: Row(
+                      children: [
                         Expanded(
-                          child: _buildSquareCard(
+                          child: _buildCollectionCard(
+                            context,
+                            title: "Wardrobe",
+                            subtitle: "Manage clothes",
+                            icon: Icons.checkroom_rounded,
+                            color: AppTheme.primaryColor,
+                            onTap: () {
+                              Navigator.push(
+                                context,
+                                MaterialPageRoute(
+                                  builder: (context) =>
+                                      WardrobePage(userId: user.uid),
+                                ),
+                              );
+                            },
+                          ),
+                        ),
+                        const SizedBox(width: 16),
+                        Expanded(
+                          child: _buildCollectionCard(
                             context,
                             title: "Gallery",
-                            subtitle: "Pose photos",
-                            icon: Icons.photo_library_outlined,
+                            subtitle: "Your photos",
+                            icon: Icons.photo_library_rounded,
                             color: AppTheme.secondaryColor,
                             onTap: () {
                               Navigator.push(
@@ -134,108 +210,111 @@ class HomePage extends StatelessWidget {
                             },
                           ),
                         ),
-                        const SizedBox(width: 16),
-                        // Try-On Card
-                        Expanded(
-                          child: _buildSquareCard(
-                            context,
-                            title: "Try-On",
-                            subtitle: "AI fitting",
-                            icon: Icons.auto_fix_high_rounded,
+                      ],
+                    ),
+                  ),
+                ),
+
+                // Quick Actions Section
+                SliverToBoxAdapter(
+                  child: Padding(
+                    padding: const EdgeInsets.fromLTRB(24, 32, 24, 16),
+                    child: Row(
+                      children: [
+                        Container(
+                          width: 4,
+                          height: 20,
+                          decoration: BoxDecoration(
                             color: const Color(0xFF0EA5E9),
-                            onTap: () {
-                              Navigator.push(
-                                context,
-                                MaterialPageRoute(
-                                  builder: (context) => MultiBlocProvider(
-                                    providers: [
-                                      BlocProvider(
-                                        create: (_) => di.sl<TryOnBloc>(),
-                                      ),
-                                      BlocProvider(
-                                        create: (_) => di.sl<GalleryBloc>(),
-                                      ),
-                                      BlocProvider(
-                                        create: (_) => di.sl<WardrobeBloc>(),
-                                      ),
-                                    ],
-                                    child: TryOnPage(userId: user.uid),
-                                  ),
-                                ),
-                              );
-                            },
+                            borderRadius: BorderRadius.circular(2),
+                          ),
+                        ),
+                        const SizedBox(width: 10),
+                        const Text(
+                          "Quick Actions",
+                          style: TextStyle(
+                            fontSize: 18,
+                            fontWeight: FontWeight.w700,
+                            color: AppTheme.primaryColor,
                           ),
                         ),
                       ],
                     ),
+                  ),
+                ),
 
-                    const SizedBox(height: 32),
-
-                    // Quick Actions Section
-                    const Text(
-                      "Quick Actions",
-                      style: TextStyle(
-                        fontSize: 18,
-                        fontWeight: FontWeight.w700,
-                        color: AppTheme.primaryColor,
-                      ),
+                // Quick Action Tiles
+                SliverToBoxAdapter(
+                  child: Padding(
+                    padding: const EdgeInsets.symmetric(horizontal: 24),
+                    child: Column(
+                      children: [
+                        _buildQuickAction(
+                          icon: Icons.add_a_photo_rounded,
+                          title: "Add to Wardrobe",
+                          subtitle: "Upload new clothing items",
+                          color: const Color(0xFF10B981),
+                          onTap: () {
+                            Navigator.push(
+                              context,
+                              MaterialPageRoute(
+                                builder: (context) =>
+                                    WardrobePage(userId: user.uid),
+                              ),
+                            );
+                          },
+                        ),
+                        const SizedBox(height: 12),
+                        _buildQuickAction(
+                          icon: Icons.camera_alt_rounded,
+                          title: "Add Pose Photo",
+                          subtitle: "For virtual try-on sessions",
+                          color: const Color(0xFFF59E0B),
+                          onTap: () {
+                            Navigator.push(
+                              context,
+                              MaterialPageRoute(
+                                builder: (context) =>
+                                    GalleryPage(userId: user.uid),
+                              ),
+                            );
+                          },
+                        ),
+                        const SizedBox(height: 12),
+                        _buildQuickAction(
+                          icon: Icons.favorite_rounded,
+                          title: "Favorite Looks",
+                          subtitle: "View your saved try-on results",
+                          color: const Color(0xFFEF4444),
+                          onTap: () => _navigateToTryOn(context, user.uid),
+                        ),
+                      ],
                     ),
-                    const SizedBox(height: 16),
+                  ),
+                ),
 
-                    // Action Tiles
-                    _buildActionTile(
-                      icon: Icons.add_photo_alternate_outlined,
-                      title: "Add clothing item",
-                      subtitle: "Upload from camera or gallery",
-                      onTap: () {
-                        Navigator.push(
-                          context,
-                          MaterialPageRoute(
-                            builder: (context) =>
-                                WardrobePage(userId: user.uid),
-                          ),
-                        );
-                      },
-                    ),
-                    const SizedBox(height: 12),
-                    _buildActionTile(
-                      icon: Icons.person_outline,
-                      title: "Add pose photo",
-                      subtitle: "For virtual try-on sessions",
-                      onTap: () {
-                        Navigator.push(
-                          context,
-                          MaterialPageRoute(
-                            builder: (context) => GalleryPage(userId: user.uid),
-                          ),
-                        );
-                      },
-                    ),
-                    const SizedBox(height: 12),
-                    _buildActionTile(
-                      icon: Icons.favorite_border,
-                      title: "Saved outfits",
-                      subtitle: "Your favorite combinations",
-                      onTap: () => _showComingSoon(context),
-                      showBadge: true,
-                      badgeText: "Soon",
-                    ),
-
-                    const SizedBox(height: 32),
-
-                    // Footer branding
-                    Center(
+                // Footer
+                SliverToBoxAdapter(
+                  child: Padding(
+                    padding: const EdgeInsets.symmetric(vertical: 40),
+                    child: Center(
                       child: Column(
                         children: [
                           Row(
                             mainAxisAlignment: MainAxisAlignment.center,
                             children: [
                               Container(
-                                width: 8,
-                                height: 8,
+                                padding: const EdgeInsets.all(6),
                                 decoration: BoxDecoration(
+                                  color: AppTheme.secondaryColor.withOpacity(
+                                    0.1,
+                                  ),
+                                  borderRadius: BorderRadius.circular(8),
+                                ),
+                                child: Icon(
+                                  Icons.auto_fix_high_rounded,
+                                  size: 16,
                                   color: AppTheme.secondaryColor,
-                                  borderRadius: BorderRadius.circular(2),
                                 ),
                               ),
                               const SizedBox(width: 8),
@@ -243,7 +322,7 @@ class HomePage extends StatelessWidget {
                                 "mirror me",
                                 style: TextStyle(
                                   fontSize: 14,
-                                  fontWeight: FontWeight.w600,
+                                  fontWeight: FontWeight.w700,
                                   color: AppTheme.textLight,
                                   letterSpacing: 1,
                                 ),
@@ -252,21 +331,19 @@ class HomePage extends StatelessWidget {
                           ),
                           const SizedBox(height: 4),
                           Text(
-                            "virtual try-on",
+                            "AI-Powered Virtual Try-On",
                             style: TextStyle(
-                              fontSize: 10,
+                              fontSize: 11,
                               color: AppTheme.textLight.withOpacity(0.6),
-                              letterSpacing: 2,
+                              letterSpacing: 0.5,
                             ),
                           ),
                         ],
                       ),
                     ),
-
-                    const SizedBox(height: 24),
-                  ],
+                  ),
                 ),
-              ),
+              ],
             ),
           ),
         );
@@ -274,12 +351,12 @@ class HomePage extends StatelessWidget {
     );
   }
 
-  Widget _buildMainCard(
+  Widget _buildHeroCard(
     BuildContext context, {
     required String title,
     required String subtitle,
     required IconData icon,
-    required Color color,
+    required Gradient gradient,
     required VoidCallback onTap,
   }) {
     return GestureDetector(
@@ -288,8 +365,15 @@ class HomePage extends StatelessWidget {
         width: double.infinity,
         padding: const EdgeInsets.all(24),
         decoration: BoxDecoration(
-          color: color,
+          gradient: gradient,
           borderRadius: BorderRadius.circular(24),
+          boxShadow: [
+            BoxShadow(
+              color: (gradient.colors.first).withOpacity(0.3),
+              blurRadius: 20,
+              offset: const Offset(0, 8),
+            ),
+          ],
         ),
         child: Row(
           children: [
@@ -300,48 +384,62 @@ class HomePage extends StatelessWidget {
                   Text(
                     title,
                     style: const TextStyle(
-                      fontSize: 24,
-                      fontWeight: FontWeight.w700,
+                      fontSize: 22,
+                      fontWeight: FontWeight.w800,
                       color: Colors.white,
+                      letterSpacing: -0.3,
                     ),
                   ),
-                  const SizedBox(height: 4),
+                  const SizedBox(height: 6),
                   Text(
                     subtitle,
                     style: TextStyle(
                       fontSize: 14,
-                      color: Colors.white.withOpacity(0.8),
+                      color: Colors.white.withOpacity(0.85),
+                      height: 1.3,
                     ),
                   ),
-                  const SizedBox(height: 20),
+                  const SizedBox(height: 18),
                   Container(
                     padding: const EdgeInsets.symmetric(
-                      horizontal: 16,
+                      horizontal: 18,
                       vertical: 10,
                     ),
                     decoration: BoxDecoration(
                       color: Colors.white,
                       borderRadius: BorderRadius.circular(12),
                     ),
-                    child: Text(
-                      "Open →",
-                      style: TextStyle(
-                        fontSize: 13,
-                        fontWeight: FontWeight.w600,
-                        color: color,
-                      ),
+                    child: const Row(
+                      mainAxisSize: MainAxisSize.min,
+                      children: [
+                        Text(
+                          "Try Now",
+                          style: TextStyle(
+                            fontSize: 14,
+                            fontWeight: FontWeight.w700,
+                            color: Color(0xFF1A1A2E),
+                          ),
+                        ),
+                        SizedBox(width: 6),
+                        Icon(
+                          Icons.arrow_forward_rounded,
+                          size: 18,
+                          color: Color(0xFF1A1A2E),
+                        ),
+                      ],
                     ),
                   ),
                 ],
               ),
             ),
+            const SizedBox(width: 12),
             Container(
               padding: const EdgeInsets.all(16),
               decoration: BoxDecoration(
                 color: Colors.white.withOpacity(0.2),
                 borderRadius: BorderRadius.circular(20),
               ),
-              child: Icon(icon, size: 48, color: Colors.white),
+              child: Icon(icon, size: 44, color: Colors.white),
             ),
           ],
         ),
@@ -349,7 +447,7 @@ class HomePage extends StatelessWidget {
     );
   }
 
-  Widget _buildSquareCard(
+  Widget _buildCollectionCard(
     BuildContext context, {
     required String title,
     required String subtitle,
@@ -365,6 +463,13 @@ class HomePage extends StatelessWidget {
           color: Colors.white,
           borderRadius: BorderRadius.circular(20),
           border: Border.all(color: Colors.grey.shade100),
+          boxShadow: [
+            BoxShadow(
+              color: Colors.black.withOpacity(0.03),
+              blurRadius: 10,
+              offset: const Offset(0, 4),
+            ),
+          ],
         ),
         child: Column(
           crossAxisAlignment: CrossAxisAlignment.start,
@@ -375,18 +480,18 @@ class HomePage extends StatelessWidget {
                 color: color.withOpacity(0.1),
                 borderRadius: BorderRadius.circular(14),
               ),
-              child: Icon(icon, size: 28, color: color),
+              child: Icon(icon, size: 26, color: color),
             ),
             const SizedBox(height: 16),
             Text(
               title,
               style: const TextStyle(
-                fontSize: 18,
+                fontSize: 17,
                 fontWeight: FontWeight.w700,
                 color: AppTheme.primaryColor,
               ),
             ),
-            const SizedBox(height: 2),
+            const SizedBox(height: 4),
             Text(
               subtitle,
               style: TextStyle(fontSize: 13, color: AppTheme.textSecondary),
@@ -397,13 +502,12 @@ class HomePage extends StatelessWidget {
     );
   }
 
-  Widget _buildActionTile({
+  Widget _buildQuickAction({
     required IconData icon,
     required String title,
     required String subtitle,
+    required Color color,
     required VoidCallback onTap,
-    bool showBadge = false,
-    String? badgeText,
   }) {
     return GestureDetector(
       onTap: onTap,
@@ -417,70 +521,82 @@ class HomePage extends StatelessWidget {
         child: Row(
           children: [
             Container(
-              padding: const EdgeInsets.all(10),
+              padding: const EdgeInsets.all(12),
               decoration: BoxDecoration(
-                color: AppTheme.accentColor,
+                color: color.withOpacity(0.1),
                 borderRadius: BorderRadius.circular(12),
               ),
-              child: Icon(icon, size: 22, color: AppTheme.primaryColor),
+              child: Icon(icon, size: 22, color: color),
             ),
-            const SizedBox(width: 14),
+            const SizedBox(width: 16),
             Expanded(
               child: Column(
                 crossAxisAlignment: CrossAxisAlignment.start,
                 children: [
-                  Row(
-                    children: [
-                      Text(
-                        title,
-                        style: const TextStyle(
-                          fontSize: 15,
-                          fontWeight: FontWeight.w600,
-                          color: AppTheme.primaryColor,
-                        ),
-                      ),
-                      if (showBadge) ...[
-                        const SizedBox(width: 8),
-                        Container(
-                          padding: const EdgeInsets.symmetric(
-                            horizontal: 8,
-                            vertical: 2,
-                          ),
-                          decoration: BoxDecoration(
-                            color: AppTheme.secondaryColor.withOpacity(0.1),
-                            borderRadius: BorderRadius.circular(8),
-                          ),
-                          child: Text(
-                            badgeText ?? "",
-                            style: TextStyle(
-                              fontSize: 10,
-                              fontWeight: FontWeight.w600,
-                              color: AppTheme.secondaryColor,
-                            ),
-                          ),
-                        ),
-                      ],
-                    ],
+                  Text(
+                    title,
+                    style: const TextStyle(
+                      fontSize: 15,
+                      fontWeight: FontWeight.w600,
+                      color: AppTheme.primaryColor,
+                    ),
                   ),
                   const SizedBox(height: 2),
                   Text(
                     subtitle,
                     style: TextStyle(
-                      fontSize: 12,
+                      fontSize: 13,
                       color: AppTheme.textSecondary,
                     ),
                   ),
                 ],
               ),
             ),
-            Icon(Icons.arrow_forward_ios, size: 16, color: AppTheme.textLight),
+            Icon(
+              Icons.chevron_right_rounded,
+              size: 22,
+              color: AppTheme.textLight,
+            ),
           ],
         ),
       ),
     );
   }
 
-  void _showLogoutSheet(BuildContext context) {
+  void _navigateToTryOn(BuildContext context, String userId) {
+    Navigator.push(
+      context,
+      MaterialPageRoute(
+        builder: (context) => MultiBlocProvider(
+          providers: [
+            BlocProvider(create: (_) => di.sl<TryOnBloc>()),
+            BlocProvider(create: (_) => di.sl<GalleryBloc>()),
+            BlocProvider(create: (_) => di.sl<WardrobeBloc>()),
+          ],
+          child: TryOnPage(userId: userId),
+        ),
+      ),
+    );
+  }
+
+  void _navigateToRecommendations(BuildContext context, String userId) {
+    Navigator.push(
+      context,
+      MaterialPageRoute(
+        builder: (context) => MultiBlocProvider(
+          providers: [
+            BlocProvider(create: (_) => di.sl<RecommendationBloc>()),
+            BlocProvider(create: (_) => di.sl<GalleryBloc>()),
+            BlocProvider(create: (_) => di.sl<WardrobeBloc>()),
+            BlocProvider(create: (_) => di.sl<TryOnBloc>()),
+          ],
+          child: RecommendationsPage(userId: userId),
+        ),
+      ),
+    );
+  }
+
+  void _showProfileSheet(BuildContext context) {
     showModalBottomSheet(
       context: context,
       backgroundColor: Colors.transparent,
@@ -502,81 +618,87 @@ class HomePage extends StatelessWidget {
               ),
             ),
             const SizedBox(height: 24),
-            const Text(
-              "Sign Out?",
-              style: TextStyle(
-                fontSize: 20,
-                fontWeight: FontWeight.w700,
-                color: AppTheme.primaryColor,
+            BlocBuilder<AuthBloc, AuthState>(
+              builder: (context, state) {
+                if (state is AuthAuthenticated) {
+                  return Column(
+                    children: [
+                      Container(
+                        width: 70,
+                        height: 70,
+                        decoration: BoxDecoration(
+                          gradient: LinearGradient(
+                            colors: [
+                              AppTheme.primaryColor,
+                              AppTheme.primaryColor.withOpacity(0.8),
+                            ],
+                            begin: Alignment.topLeft,
+                            end: Alignment.bottomRight,
+                          ),
+                          borderRadius: BorderRadius.circular(20),
+                        ),
+                        child: Center(
+                          child: Text(
+                            (state.user.name ?? 'U')[0].toUpperCase(),
+                            style: const TextStyle(
+                              color: Colors.white,
+                              fontSize: 28,
+                              fontWeight: FontWeight.w700,
+                            ),
+                          ),
+                        ),
+                      ),
+                      const SizedBox(height: 16),
+                      Text(
+                        state.user.name ?? 'User',
+                        style: const TextStyle(
+                          fontSize: 20,
+                          fontWeight: FontWeight.w700,
+                          color: AppTheme.primaryColor,
+                        ),
+                      ),
+                      const SizedBox(height: 4),
+                      Text(
+                        state.user.email,
+                        style: TextStyle(
+                          fontSize: 14,
+                          color: AppTheme.textSecondary,
+                        ),
+                      ),
+                    ],
+                  );
+                }
+                return const SizedBox.shrink();
+              },
+            ),
+            const SizedBox(height: 32),
+            SizedBox(
+              width: double.infinity,
+              child: ElevatedButton.icon(
+                onPressed: () {
+                  Navigator.pop(context);
+                  context.read<AuthBloc>().add(AuthLogoutRequested());
+                },
+                icon: const Icon(Icons.logout_rounded, color: Colors.white),
+                label: const Text(
+                  "Sign Out",
+                  style: TextStyle(
+                    fontWeight: FontWeight.w600,
+                    color: Colors.white,
+                  ),
+                ),
+                style: ElevatedButton.styleFrom(
+                  padding: const EdgeInsets.symmetric(vertical: 16),
+                  backgroundColor: AppTheme.secondaryColor,
+                  shape: RoundedRectangleBorder(
+                    borderRadius: BorderRadius.circular(14),
+                  ),
+                ),
               ),
-            ),
-            const SizedBox(height: 8),
-            Text(
-              "You'll need to sign in again to access your wardrobe",
-              style: TextStyle(fontSize: 14, color: AppTheme.textSecondary),
-              textAlign: TextAlign.center,
-            ),
-            const SizedBox(height: 24),
-            Row(
-              children: [
-                Expanded(
-                  child: OutlinedButton(
-                    onPressed: () => Navigator.pop(context),
-                    style: OutlinedButton.styleFrom(
-                      padding: const EdgeInsets.symmetric(vertical: 14),
-                      side: BorderSide(color: Colors.grey.shade300),
-                      shape: RoundedRectangleBorder(
-                        borderRadius: BorderRadius.circular(12),
-                      ),
-                    ),
-                    child: const Text(
-                      "Cancel",
-                      style: TextStyle(
-                        color: AppTheme.textSecondary,
-                        fontWeight: FontWeight.w600,
-                      ),
-                    ),
-                  ),
-                ),
-                const SizedBox(width: 12),
-                Expanded(
-                  child: ElevatedButton(
-                    onPressed: () {
-                      Navigator.pop(context);
-                      context.read<AuthBloc>().add(AuthLogoutRequested());
-                    },
-                    style: ElevatedButton.styleFrom(
-                      padding: const EdgeInsets.symmetric(vertical: 14),
-                      backgroundColor: AppTheme.secondaryColor,
-                      shape: RoundedRectangleBorder(
-                        borderRadius: BorderRadius.circular(12),
-                      ),
-                    ),
-                    child: const Text(
-                      "Sign Out",
-                      style: TextStyle(
-                        fontWeight: FontWeight.w600,
-                        color: Colors.white,
-                      ),
-                    ),
-                  ),
-                ),
-              ],
             ),
             const SizedBox(height: 16),
           ],
         ),
-      ),
-    );
-  }
-
-  void _showComingSoon(BuildContext context) {
-    ScaffoldMessenger.of(context).showSnackBar(
-      SnackBar(
-        content: const Text("Coming soon! 🚀"),
-        backgroundColor: AppTheme.primaryColor,
-        behavior: SnackBarBehavior.floating,
-        shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(10)),
       ),
     );
   }

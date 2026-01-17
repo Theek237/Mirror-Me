@@ -57,6 +57,15 @@ class TryOnResultsLoadedState extends TryOnState {
   List<Object> get props => [results];
 }
 
+class TryOnFavoriteToggledState extends TryOnState {
+  final TryOnResult result;
+
+  const TryOnFavoriteToggledState({required this.result});
+
+  @override
+  List<Object> get props => [result];
+}
+
 class TryOnErrorState extends TryOnState {
   final String message;
 
