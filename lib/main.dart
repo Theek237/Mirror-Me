@@ -1,6 +1,7 @@
 import 'package:flutter/material.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
 import 'package:supabase_flutter/supabase_flutter.dart';
+import 'package:mm/core/theme/app_theme.dart';
 import 'package:mm/features/auth/presentation/bloc/auth%20bloc/auth_bloc.dart';
 import 'package:mm/features/wardrobe/presentation/bloc/wardrobe%20bloc/wardrobe_bloc.dart';
 import 'package:mm/features/auth/presentation/pages/auth_wrapper.dart';
@@ -40,18 +41,9 @@ class MyApp extends StatelessWidget {
         BlocProvider(create: (_) => di.sl<WardrobeBloc>()),
       ],
       child: MaterialApp(
-        title: 'AI Virtual Wardrobe',
-        theme: ThemeData(
-          colorScheme: ColorScheme.fromSeed(seedColor: Colors.deepPurple),
-          useMaterial3: true,
-          inputDecorationTheme: InputDecorationTheme(
-            border: OutlineInputBorder(
-              borderRadius: BorderRadius.circular(12.0),
-            ),
-            filled: true,
-            fillColor: Colors.grey.shade200,
-          ),
-        ),
+        title: 'Mirror Me - Virtual Try-On',
+        debugShowCheckedModeBanner: false,
+        theme: AppTheme.lightTheme,
         home: const AuthWrapper(),
       ),
     );
