@@ -66,6 +66,19 @@ class TryOnLoadResultsEvent extends TryOnEvent {
   List<Object> get props => [userId];
 }
 
+class TryOnToggleFavoriteEvent extends TryOnEvent {
+  final String resultId;
+  final bool isFavorite;
+
+  const TryOnToggleFavoriteEvent({
+    required this.resultId,
+    required this.isFavorite,
+  });
+
+  @override
+  List<Object> get props => [resultId, isFavorite];
+}
+
 class TryOnResetEvent extends TryOnEvent {
   const TryOnResetEvent();
 }

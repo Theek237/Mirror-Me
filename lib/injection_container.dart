@@ -24,7 +24,16 @@ import 'package:mm/features/tryon/domain/repositories/tryon_repository.dart';
 import 'package:mm/features/tryon/domain/usecases/generate_tryon.dart';
 import 'package:mm/features/tryon/domain/usecases/get_tryon_results.dart';
 import 'package:mm/features/tryon/domain/usecases/save_tryon_result.dart';
+import 'package:mm/features/tryon/domain/usecases/toggle_tryon_favorite.dart';
 import 'package:mm/features/tryon/presentation/bloc/tryon_bloc.dart';
+import 'package:mm/features/recommendations/data/datasources/recommendation_remote_data_source.dart';
+import 'package:mm/features/recommendations/data/datasources/recommendation_supabase_data_source.dart';
+import 'package:mm/features/recommendations/data/repositories/recommendation_repository_impl.dart';
+import 'package:mm/features/recommendations/domain/repositories/recommendation_repository.dart';
+import 'package:mm/features/recommendations/domain/usecases/generate_recommendation.dart';
+import 'package:mm/features/recommendations/domain/usecases/save_recommendation.dart';
+import 'package:mm/features/recommendations/domain/usecases/get_recommendations.dart';
+import 'package:mm/features/recommendations/presentation/bloc/recommendation_bloc.dart';
 
 //Service Locator
 final sl = GetIt.instance;
@@ -99,6 +108,7 @@ Future<void> init() async {
       generateTryOn: sl(),
       saveTryOnResult: sl(),
       getTryOnResults: sl(),
+      toggleTryOnFavorite: sl(),
     ),
   );
 
@@ -106,6 +116,7 @@ Future<void> init() async {
   sl.registerLazySingleton(() => GenerateTryOn(sl()));
   sl.registerLazySingleton(() => SaveTryOnResult(sl()));
   sl.registerLazySingleton(() => GetTryOnResults(sl()));
+  sl.registerLazySingleton(() => ToggleTryOnFavorite(sl()));
 
   //Repository
   sl.registerLazySingleton<TryOnRepository>(
@@ -119,5 +130,38 @@ Future<void> init() async {
 
   sl.registerLazySingleton<TryOnRemoteDataSource>(
     () => TryOnRemoteDataSourceImpl(supabaseClient: sl()),
+  );
+
+  //----------------------------------------------------//
+  //Recommendations Feature
+  //BLoC
+  sl.registerFactory(
+    () => RecommendationBloc(
+      generateRecommendation: sl(),
+      saveRecommendation: sl(),
+      getRecommendations: sl(),
+    ),
+  );
+
+  //Use Cases
+  sl.registerLazySingleton(() => GenerateRecommendation(sl()));
+  sl.registerLazySingleton(() => SaveRecommendation(sl()));
+  sl.registerLazySingleton(() => GetRecommendations(sl()));
+
+  //Repository
+  sl.registerLazySingleton<RecommendationRepository>(
+    () => RecommendationRepositoryImpl(
+      remoteDataSource: sl(),
+      supabaseDataSource: sl(),
+    ),
+  );
+
+  //Data Sources
+  sl.registerLazySingleton<RecommendationRemoteDataSource>(
+    () => RecommendationRemoteDataSourceImpl(apiKey: GeminiConfig.apiKey),
+  );
+
+  sl.registerLazySingleton<RecommendationSupabaseDataSource>(
+    () => RecommendationSupabaseDataSourceImpl(supabaseClient: sl()),
   );
 }

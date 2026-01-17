@@ -85,4 +85,33 @@ class TryOnRepositoryImpl implements TryOnRepository {
       return Left(ServerFailure('Unexpected error: $e'));
     }
   }
+
+  @override
+  Future<Either<Failure, List<TryOnResult>>> getFavoriteTryOnResults(
+    String userId,
+  ) async {
+    try {
+      final results = await tryOnDataSource.getFavoriteTryOnResults(userId);
+      return Right(results);
+    } on ServerException catch (e) {
+      return Left(ServerFailure(e.message ?? 'Failed to fetch favorites'));
+    } catch (e) {
+      return Left(ServerFailure('Unexpected error: $e'));
+    }
+  }
+
+  @override
+  Future<Either<Failure, TryOnResult>> toggleFavorite(
+    String resultId,
+    bool isFavorite,
+  ) async {
+    try {
+      final result = await tryOnDataSource.toggleFavorite(resultId, isFavorite);
+      return Right(result);
+    } on ServerException catch (e) {
+      return Left(ServerFailure(e.message ?? 'Failed to toggle favorite'));
+    } catch (e) {
+      return Left(ServerFailure('Unexpected error: $e'));
+    }
+  }
 }

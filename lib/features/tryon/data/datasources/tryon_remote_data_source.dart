@@ -17,6 +17,12 @@ abstract class TryOnRemoteDataSource {
   /// Gets all try-on results for a user
   Future<List<TryOnResultModel>> getTryOnResults(String userId);
 
+  /// Gets favorite try-on results for a user
+  Future<List<TryOnResultModel>> getFavoriteTryOnResults(String userId);
+
+  /// Toggles favorite status for a try-on result
+  Future<TryOnResultModel> toggleFavorite(String resultId, bool isFavorite);
+
   /// Deletes a try-on result
   Future<void> deleteTryOnResult(String resultId);
 }
@@ -129,6 +135,47 @@ class TryOnRemoteDataSourceImpl implements TryOnRemoteDataSource {
       throw ServerException(message: 'Storage error: ${e.message}');
     } catch (e) {
       throw ServerException(message: 'Failed to delete try-on result: $e');
+    }
+  }
+
+  @override
+  Future<List<TryOnResultModel>> getFavoriteTryOnResults(String userId) async {
+    try {
+      final response = await supabaseClient
+          .from('tryon_results')
+          .select()
+          .eq('user_id', userId)
+          .eq('is_favorite', true)
+          .order('created_at', ascending: false);
+
+      return (response as List)
+          .map((json) => TryOnResultModel.fromJson(json))
+          .toList();
+    } on PostgrestException catch (e) {
+      throw ServerException(message: 'Database error: ${e.message}');
+    } catch (e) {
+      throw ServerException(message: 'Failed to fetch favorite results: $e');
+    }
+  }
+
+  @override
+  Future<TryOnResultModel> toggleFavorite(
+    String resultId,
+    bool isFavorite,
+  ) async {
+    try {
+      final response = await supabaseClient
+          .from('tryon_results')
+          .update({'is_favorite': isFavorite})
+          .eq('id', resultId)
+          .select()
+          .single();
+
+      return TryOnResultModel.fromJson(response);
+    } on PostgrestException catch (e) {
+      throw ServerException(message: 'Database error: ${e.message}');
+    } catch (e) {
+      throw ServerException(message: 'Failed to update favorite status: $e');
     }
   }
 }
