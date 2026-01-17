@@ -1,87 +1,99 @@
 import 'dart:io';
-import 'package:cloud_firestore/cloud_firestore.dart';
-import 'package:dio/dio.dart';
+import 'package:supabase_flutter/supabase_flutter.dart';
 import 'package:mm/features/wardrobe/data/models/clothing_item_model.dart';
 import 'package:uuid/uuid.dart';
 
 abstract class WardrobeRemoteDataSource {
   Future<List<ClothingItemModel>> getClothingItems(String userId);
-  Future<void> addClothingItem(String userId, String name, String category, File imageFile);
+  Future<void> addClothingItem(
+    String userId,
+    String name,
+    String category,
+    File imageFile,
+  );
   Future<void> deleteClothingItem(String userId, String itemId);
 }
 
-class WardrobeRemoteDataSourceImpl implements WardrobeRemoteDataSource{
-  final FirebaseFirestore firestore;
-  final Dio dio = Dio(BaseOptions(
-    connectTimeout: const Duration(seconds: 60),
-    receiveTimeout: const Duration(seconds: 60),
-    sendTimeout: const Duration(seconds: 60),
-  ));
+class WardrobeRemoteDataSourceImpl implements WardrobeRemoteDataSource {
+  final SupabaseClient supabaseClient;
 
-  final String cloudName = 'duoqffei6';
-  final String uploadPreset = 'ai_wardrobe_preset';
-
-  WardrobeRemoteDataSourceImpl({
-    required this.firestore,
-  });
+  WardrobeRemoteDataSourceImpl({required this.supabaseClient});
 
   @override
-  Future<void> addClothingItem(String userId, String name, String category, File imageFile) async {
-    try{
-      String fileName = imageFile.path.split('/').last;
-      
-      // Read file as bytes to avoid potential file lock/access issues during upload
-      final bytes = await imageFile.readAsBytes();
-      
-      FormData formData = FormData.fromMap({
-        "file": MultipartFile.fromBytes(bytes, filename: fileName),
-        "upload_preset": uploadPreset,
-        "folder": "user_cloths/$userId",
-      });
+  Future<void> addClothingItem(
+    String userId,
+    String name,
+    String category,
+    File imageFile,
+  ) async {
+    try {
+      final String itemId = const Uuid().v4();
+      final String fileName = '$itemId.${imageFile.path.split('.').last}';
+      final String storagePath = 'user_cloths/$userId/$fileName';
 
-      Response response = await dio.post(
-        'https://api.cloudinary.com/v1_1/$cloudName/image/upload',
-        data: formData,
+      // Upload image to Supabase Storage
+      await supabaseClient.storage
+          .from('wardrobe')
+          .upload(storagePath, imageFile);
+
+      // Get the public URL for the uploaded image
+      final String imageUrl = supabaseClient.storage
+          .from('wardrobe')
+          .getPublicUrl(storagePath);
+
+      // Create the clothing item model
+      final model = ClothingItemModel(
+        id: itemId,
+        name: name,
+        category: category,
+        imageUrl: imageUrl,
+        userId: userId,
       );
 
-      if(response.statusCode == 200){
-        String imageUrl = response.data['secure_url'];
-        
-        final String itemId = const Uuid().v4();
-        final model = ClothingItemModel(id: itemId, name: name, category: category, imageUrl: imageUrl, userId: userId);
-
-        await firestore.collection('users').doc(userId).collection('wardrobe').doc(itemId).set(model.toJson());
-
-      } else {
-        throw Exception('Failed to upload image to Cloudinary');
-      }
-    } catch (e){
+      // Insert into wardrobe table
+      await supabaseClient.from('wardrobe').insert(model.toJson());
+    } catch (e) {
       throw Exception('Error adding clothing item: $e');
     }
   }
 
   @override
   Future<void> deleteClothingItem(String userId, String itemId) async {
-    await firestore
-      .collection('users')
-      .doc(userId)
-      .collection('wardrobe')
-      .doc(itemId)
-      .delete();
+    // First get the item to find the storage path
+    final response = await supabaseClient
+        .from('wardrobe')
+        .select()
+        .eq('id', itemId)
+        .eq('user_id', userId)
+        .maybeSingle();
+
+    if (response != null) {
+      final imageUrl = response['image_url'] as String;
+      // Extract storage path from URL
+      final storagePath = imageUrl.split('/wardrobe/').last;
+
+      // Delete from storage
+      await supabaseClient.storage.from('wardrobe').remove([storagePath]);
+    }
+
+    // Delete from database
+    await supabaseClient
+        .from('wardrobe')
+        .delete()
+        .eq('id', itemId)
+        .eq('user_id', userId);
   }
 
   @override
   Future<List<ClothingItemModel>> getClothingItems(String userId) async {
-    final querySnapshot = await firestore
-      .collection('users')
-      .doc(userId)
-      .collection('wardrobe')
-      .orderBy('createdAt', descending: true)
-      .get();
+    final response = await supabaseClient
+        .from('wardrobe')
+        .select()
+        .eq('user_id', userId)
+        .order('created_at', ascending: false);
 
-    return querySnapshot.docs
-      .map((doc) => ClothingItemModel.fromSnapshot(doc),)
-      .toList();
+    return (response as List)
+        .map((item) => ClothingItemModel.fromJson(item))
+        .toList();
   }
-
 }

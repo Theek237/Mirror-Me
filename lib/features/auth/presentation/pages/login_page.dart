@@ -109,17 +109,17 @@ class _LoginPageState extends State<LoginPage> {
 
                   const SizedBox(height: 16),
 
-                  OutlinedButton.icon(
-                    style: OutlinedButton.styleFrom(
-                      padding: const EdgeInsets.symmetric(vertical: 16),
-                    ),
-                    icon: Icon(Icons.g_mobiledata, size: 28),
-                    onPressed: () {
-                      context.read<AuthBloc>().add(AuthGoogleLoginRequested());
-                    },
-                    label: Text("Sign in With Google"),
-                  ),
-
+                  // Google Sign-In button (disabled for now)
+                  // OutlinedButton.icon(
+                  //   style: OutlinedButton.styleFrom(
+                  //     padding: const EdgeInsets.symmetric(vertical: 16),
+                  //   ),
+                  //   icon: Icon(Icons.g_mobiledata, size: 28),
+                  //   onPressed: () {
+                  //     context.read<AuthBloc>().add(AuthGoogleLoginRequested());
+                  //   },
+                  //   label: Text("Sign in With Google"),
+                  // ),
                   const SizedBox(height: 16),
 
                   TextButton(

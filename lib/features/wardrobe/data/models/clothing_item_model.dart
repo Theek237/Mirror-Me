@@ -1,35 +1,33 @@
-import 'package:cloud_firestore/cloud_firestore.dart';
 import 'package:mm/features/wardrobe/domain/entities/clothing_item.dart';
 
-class ClothingItemModel extends ClothingItemEntity{
+class ClothingItemModel extends ClothingItemEntity {
   const ClothingItemModel({
     required super.id,
     required super.name,
     required super.category,
     required super.imageUrl,
-    required super.userId
+    required super.userId,
   });
 
-  //From Firebase Firestore DocumentSnapshot
-  factory ClothingItemModel.fromSnapshot(DocumentSnapshot doc){
-    final data = doc.data() as Map<String,dynamic>;
+  // From Supabase row (Map)
+  factory ClothingItemModel.fromJson(Map<String, dynamic> json) {
     return ClothingItemModel(
-      id: doc.id,
-      name: data['name'] ?? '',
-      category: data['category'] ?? '',
-      imageUrl: data['imageUrl'] ?? '',
-      userId: data['userId'] ?? ''
-    );  
+      id: json['id'] ?? '',
+      name: json['name'] ?? '',
+      category: json['category'] ?? '',
+      imageUrl: json['image_url'] ?? '',
+      userId: json['user_id'] ?? '',
+    );
   }
 
-  //To Firebase Firestore Map
-  Map<String,dynamic> toJson(){
+  // To Supabase Map
+  Map<String, dynamic> toJson() {
     return {
+      'id': id,
       'name': name,
       'category': category,
-      'imageUrl': imageUrl,
-      'userId': userId,
-      'createdAt': FieldValue.serverTimestamp(),
+      'image_url': imageUrl,
+      'user_id': userId,
     };
   }
 }

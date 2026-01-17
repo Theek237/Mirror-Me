@@ -1,5 +1,5 @@
 import 'package:mm/features/auth/domain/entities/user_entity.dart';
-import 'package:firebase_auth/firebase_auth.dart';
+import 'package:supabase_flutter/supabase_flutter.dart';
 
 class UserModel extends UserEntity{
   const UserModel({
@@ -9,12 +9,30 @@ class UserModel extends UserEntity{
     super.photoUrl,
   });
 
-  factory UserModel.fromFirebaseUser(User user){
+  factory UserModel.fromSupabaseUser(User user, {String? name}){
     return UserModel(
-      uid: user.uid,
+      uid: user.id,
       email: user.email ?? '',
-      name: user.displayName,
-      photoUrl: user.photoURL,
+      name: name ?? user.userMetadata?['name'],
+      photoUrl: user.userMetadata?['avatar_url'],
     );
+  }
+
+  factory UserModel.fromJson(Map<String, dynamic> json) {
+    return UserModel(
+      uid: json['id'] ?? '',
+      email: json['email'] ?? '',
+      name: json['name'],
+      photoUrl: json['photo_url'],
+    );
+  }
+
+  Map<String, dynamic> toJson() {
+    return {
+      'id': uid,
+      'email': email,
+      'name': name,
+      'photo_url': photoUrl,
+    };
   }
 }

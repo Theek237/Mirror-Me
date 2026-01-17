@@ -1,73 +1,100 @@
-import 'package:cloud_firestore/cloud_firestore.dart';
-import 'package:firebase_auth/firebase_auth.dart';
+import 'package:flutter/foundation.dart';
+import 'package:supabase_flutter/supabase_flutter.dart';
 import 'package:mm/features/auth/data/models/user_model.dart';
-// import 'package:google_sign_in/google_sign_in.dart';
-
 
 abstract class AuthRemoteDataSource {
   Future<UserModel> loginWithEmail(String email, String password);
-  Future<UserModel> registerWithEmail(String email, String password, String name);
-  // Future<UserModel> loginWithGoogle();
+  Future<UserModel> registerWithEmail(
+    String email,
+    String password,
+    String name,
+  );
   Future<void> logout();
   Future<UserModel?> getCurrentUser();
 }
 
-class AuthRemoteDataSourceImpl implements AuthRemoteDataSource{
-  final FirebaseAuth firebaseAuth;
-  // final GoogleSignIn googleSignIn;
-  final FirebaseFirestore firestore;
+class AuthRemoteDataSourceImpl implements AuthRemoteDataSource {
+  final SupabaseClient supabaseClient;
 
-  AuthRemoteDataSourceImpl({
-    required this.firebaseAuth,
-    // this.googleSignIn,
-    required this.firestore,
-  });
+  AuthRemoteDataSourceImpl({required this.supabaseClient});
 
   @override
   Future<UserModel> loginWithEmail(String email, String password) async {
-    final userCredential = await firebaseAuth.signInWithEmailAndPassword(
-      email: email,
-      password: password
-    );
-    return UserModel.fromFirebaseUser(userCredential.user!);
+    debugPrint('AuthDataSource: Starting login...');
+    try {
+      final response = await supabaseClient.auth
+          .signInWithPassword(email: email, password: password)
+          .timeout(
+            const Duration(seconds: 30),
+            onTimeout: () => throw Exception(
+              'Login timeout - please check your internet connection',
+            ),
+          );
+
+      debugPrint('AuthDataSource: Login response received');
+
+      if (response.user == null) {
+        throw Exception('Login failed - no user returned');
+      }
+
+      debugPrint(
+        'AuthDataSource: Login successful for ${response.user!.email}',
+      );
+      return UserModel.fromSupabaseUser(response.user!);
+    } catch (e) {
+      debugPrint('AuthDataSource: Login error - $e');
+      rethrow;
+    }
   }
 
   @override
-  Future<UserModel> registerWithEmail(String email, String password, String name) async {
-    final userCredential = await firebaseAuth.createUserWithEmailAndPassword(
-      email: email,
-      password: password
-    );
-    await userCredential.user!.updateDisplayName(name);
+  Future<UserModel> registerWithEmail(
+    String email,
+    String password,
+    String name,
+  ) async {
+    debugPrint('AuthDataSource: Starting registration...');
+    try {
+      final response = await supabaseClient.auth
+          .signUp(email: email, password: password, data: {'name': name})
+          .timeout(
+            const Duration(seconds: 30),
+            onTimeout: () => throw Exception(
+              'Registration timeout - please check your internet connection',
+            ),
+          );
 
-    await firestore.collection('users').doc(userCredential.user!.uid).set({
-      'userId': userCredential.user!.uid,
-      'name':name,
-      'email':email,
-      'createdAt': FieldValue.serverTimestamp(),
-      'authProvider': 'email',
-    });
-    return UserModel.fromFirebaseUser(userCredential.user!);  
+      debugPrint('AuthDataSource: Registration response received');
+
+      if (response.user == null) {
+        throw Exception('Registration failed - no user returned');
+      }
+
+      debugPrint(
+        'AuthDataSource: Registration successful for ${response.user!.email}',
+      );
+      return UserModel.fromSupabaseUser(response.user!, name: name);
+    } catch (e) {
+      debugPrint('AuthDataSource: Registration error - $e');
+      rethrow;
+    }
   }
 
-  // @override
-  // Future<UserModel> loginWithGoogle() {
-  //   // TODO: implement loginWithGoogle
-  //   throw UnimplementedError();
-  // }
-
   @override
-  Future<void> logout() async{
-    await firebaseAuth.signOut();
-  } //await googleSignIn.signOut();
+  Future<void> logout() async {
+    debugPrint('AuthDataSource: Logging out...');
+    await supabaseClient.auth.signOut();
+    debugPrint('AuthDataSource: Logout complete');
+  }
 
   @override
   Future<UserModel?> getCurrentUser() async {
-    final user = firebaseAuth.currentUser;
-    if(user != null){
-      return UserModel.fromFirebaseUser(user);
+    final user = supabaseClient.auth.currentUser;
+    if (user != null) {
+      debugPrint('AuthDataSource: Current user found - ${user.email}');
+      return UserModel.fromSupabaseUser(user);
     }
+    debugPrint('AuthDataSource: No current user');
     return null;
   }
-
 }

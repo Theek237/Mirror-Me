@@ -1,16 +1,20 @@
-import 'package:firebase_core/firebase_core.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
+import 'package:supabase_flutter/supabase_flutter.dart';
 import 'package:mm/features/auth/presentation/bloc/auth%20bloc/auth_bloc.dart';
-import 'package:mm/features/tryon/presentation/bloc/try_on_bloc.dart';
 import 'package:mm/features/wardrobe/presentation/bloc/wardrobe%20bloc/wardrobe_bloc.dart';
 import 'package:mm/features/auth/presentation/pages/auth_wrapper.dart';
-import 'package:mm/firebase_options.dart';
+import 'package:mm/supabase_options.dart';
 import 'injection_container.dart' as di;
 
 void main() async {
   WidgetsFlutterBinding.ensureInitialized();
-  await Firebase.initializeApp(options: DefaultFirebaseOptions.currentPlatform);
+
+  // Initialize Supabase
+  await Supabase.initialize(
+    url: SupabaseOptions.url,
+    anonKey: SupabaseOptions.anonKey,
+  );
 
   //Initialize Dependency Injection
   await di.init();
@@ -26,10 +30,14 @@ class MyApp extends StatelessWidget {
     return MultiBlocProvider(
       providers: [
         BlocProvider(
-          create: (_) => di.sl<AuthBloc>()..add(AuthCheckRequested()),
+          create: (context) {
+            final bloc = di.sl<AuthBloc>();
+            // Defer the auth check to allow UI to render first
+            Future.microtask(() => bloc.add(AuthCheckRequested()));
+            return bloc;
+          },
         ),
         BlocProvider(create: (_) => di.sl<WardrobeBloc>()),
-        // BlocProvider(create: (_) => di.sl<TryOnBloc>()),
       ],
       child: MaterialApp(
         title: 'AI Virtual Wardrobe',

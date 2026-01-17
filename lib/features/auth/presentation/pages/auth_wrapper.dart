@@ -4,24 +4,33 @@ import 'package:mm/features/auth/presentation/bloc/auth%20bloc/auth_bloc.dart';
 import 'package:mm/features/auth/presentation/pages/home_page.dart';
 import 'package:mm/features/auth/presentation/pages/login_page.dart';
 
-class AuthWrapper extends StatelessWidget {
+class AuthWrapper extends StatefulWidget {
   const AuthWrapper({super.key});
 
   @override
+  State<AuthWrapper> createState() => _AuthWrapperState();
+}
+
+class _AuthWrapperState extends State<AuthWrapper> {
+  // Cache the pages to prevent unnecessary rebuilds
+  final HomePage _homePage = const HomePage();
+  final LoginPage _loginPage = const LoginPage();
+
+  @override
   Widget build(BuildContext context) {
-    return BlocBuilder<AuthBloc,AuthState>(
+    return BlocBuilder<AuthBloc, AuthState>(
+      buildWhen: (previous, current) {
+        // Only rebuild when authentication status actually changes
+        final wasAuthenticated = previous is AuthAuthenticated;
+        final isAuthenticated = current is AuthAuthenticated;
+        return wasAuthenticated != isAuthenticated;
+      },
       builder: (context, state) {
-        print("AuthWrapper State: $state");
+        debugPrint("AuthWrapper State: $state");
         if (state is AuthAuthenticated) {
-          return const HomePage();
-        } else if (state is AuthUnauthenticated || state is AuthError || state is AuthLoading) {
-          return const LoginPage();
+          return _homePage;
         }
-        return const Scaffold(
-          body: Center(
-            child: CircularProgressIndicator(),
-          ),
-        );
+        return _loginPage;
       },
     );
   }
