@@ -3,7 +3,6 @@
 // import 'package:mm/features/auth/domain/repositiories/auth_repository.dart';
 // import 'package:flutter_bloc/flutter_bloc.dart';
 
-
 // //Events
 // // abstract class AuthEvent extends Equatable {
 // //   const AuthEvent();
@@ -30,7 +29,6 @@
 // // class AuthGoogleLoginRequested extends AuthEvent{}
 
 // // class AuthLogoutRequested extends AuthEvent{}
-
 
 // //States
 // // abstract class AuthState extends Equatable{
@@ -109,5 +107,3 @@
 // //     });
 // //   }
 // // }
-
-

@@ -8,47 +8,58 @@ part 'wardrobe_state.dart';
 
 class WardrobeBloc extends Bloc<WardrobeEvent, WardrobeState> {
   final WardrobeRepository repository;
-  
+
   WardrobeBloc({required this.repository}) : super(WardrobeInitialState()) {
-    on<WardrobeLoadWardrobeItemsEvent>((event, emit) async{
+    on<WardrobeLoadWardrobeItemsEvent>((event, emit) async {
       emit(WardrobeLoadingState());
       final result = await repository.getClothingItems(event.userId);
       result.fold(
         (failure) => emit(WardrobeErrorState(message: failure.toString())),
-        (clothingItems) => emit(WardrobeLoadedState(clothingItems: clothingItems)),
+        (clothingItems) =>
+            emit(WardrobeLoadedState(clothingItems: clothingItems)),
       );
     });
 
-    on<WardrobeAddClothingItemEvent>((event, emit) async{
+    on<WardrobeAddClothingItemEvent>((event, emit) async {
       emit(WardrobeLoadingState());
-      final result = await repository.addClothingItem(event.userId, event.name, event.category, event.imageFile);
+      final result = await repository.addClothingItem(
+        event.userId,
+        event.name,
+        event.category,
+        event.imageFile,
+      );
       await result.fold(
-        (failure) async => emit(WardrobeErrorState(message: failure.toString())),
+        (failure) async =>
+            emit(WardrobeErrorState(message: failure.toString())),
         (_) async {
           final loadResult = await repository.getClothingItems(event.userId);
           loadResult.fold(
             (failure) => emit(WardrobeErrorState(message: failure.toString())),
-            (clothingItems) => emit(WardrobeLoadedState(clothingItems: clothingItems)),
+            (clothingItems) =>
+                emit(WardrobeLoadedState(clothingItems: clothingItems)),
           );
         },
       );
     });
 
-    on<WardrobeDeleteClothingItemEvent>((event, emit) async{
+    on<WardrobeDeleteClothingItemEvent>((event, emit) async {
       emit(WardrobeLoadingState());
-      final result = await repository.deleteClothingItem(event.userId, event.itemId);
+      final result = await repository.deleteClothingItem(
+        event.userId,
+        event.itemId,
+      );
       await result.fold(
-        (failure) async => emit(WardrobeErrorState(message: failure.toString())),
+        (failure) async =>
+            emit(WardrobeErrorState(message: failure.toString())),
         (_) async {
           final loadResult = await repository.getClothingItems(event.userId);
           loadResult.fold(
             (failure) => emit(WardrobeErrorState(message: failure.toString())),
-            (clothingItems) => emit(WardrobeLoadedState(clothingItems: clothingItems)),
+            (clothingItems) =>
+                emit(WardrobeLoadedState(clothingItems: clothingItems)),
           );
         },
       );
     });
-
-    
   }
 }

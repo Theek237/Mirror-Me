@@ -1,41 +1,41 @@
 import 'dart:io';
-import 'package:image_picker/image_picker.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
+import 'package:image_picker/image_picker.dart';
 import 'package:mm/core/theme/app_theme.dart';
-import 'package:mm/features/wardrobe/presentation/bloc/wardrobe%20bloc/wardrobe_bloc.dart';
+import 'package:mm/features/gallery/presentation/bloc/gallery_bloc.dart';
 
-class AddClothPage extends StatefulWidget {
+class AddImagePage extends StatefulWidget {
   final String userId;
-  const AddClothPage({super.key, required this.userId});
+  const AddImagePage({super.key, required this.userId});
 
   @override
-  State<AddClothPage> createState() => _AddClothPageState();
+  State<AddImagePage> createState() => _AddImagePageState();
 }
 
-class _AddClothPageState extends State<AddClothPage> {
-  final _nameController = TextEditingController();
+class _AddImagePageState extends State<AddImagePage> {
+  final _poseNameController = TextEditingController();
+  final _descriptionController = TextEditingController();
   final _formKey = GlobalKey<FormState>();
   File? _selectedImage;
-  String _selectedCategory = 'T-Shirt';
+  String _selectedPose = 'Front View';
 
-  final List<Map<String, dynamic>> _categories = [
-    {'name': 'T-Shirt', 'icon': Icons.checkroom},
-    {'name': 'Shirt', 'icon': Icons.dry_cleaning},
-    {'name': 'Trousers', 'icon': Icons.accessibility_new},
-    {'name': 'Dress', 'icon': Icons.woman},
-    {'name': 'Jacket', 'icon': Icons.shield},
-    {'name': 'Shoes', 'icon': Icons.snowshoeing},
-    {'name': 'Other', 'icon': Icons.category},
+  final List<Map<String, dynamic>> _poseTypes = [
+    {'name': 'Front View', 'icon': Icons.person},
+    {'name': 'Side View', 'icon': Icons.person_outline},
+    {'name': 'Back View', 'icon': Icons.person_pin},
+    {'name': 'Full Body', 'icon': Icons.accessibility_new},
+    {'name': 'Upper Body', 'icon': Icons.face},
+    {'name': 'Custom', 'icon': Icons.edit},
   ];
 
   Future<void> _pickImage(ImageSource source) async {
     final picker = ImagePicker();
     final pickedFile = await picker.pickImage(
       source: source,
-      maxWidth: 800,
-      maxHeight: 800,
-      imageQuality: 85,
+      maxWidth: 1024,
+      maxHeight: 1024,
+      imageQuality: 90,
     );
 
     if (pickedFile != null) {
@@ -165,7 +165,7 @@ class _AddClothPageState extends State<AddClothPage> {
                   const SizedBox(width: 16),
                   const Expanded(
                     child: Text(
-                      "Add Clothing",
+                      "Add New Pose",
                       style: TextStyle(
                         fontSize: 24,
                         fontWeight: FontWeight.w700,
@@ -179,9 +179,9 @@ class _AddClothPageState extends State<AddClothPage> {
 
             // Content
             Expanded(
-              child: BlocListener<WardrobeBloc, WardrobeState>(
+              child: BlocListener<GalleryBloc, GalleryState>(
                 listener: (context, state) {
-                  if (state is WardrobeErrorState) {
+                  if (state is GalleryErrorState) {
                     ScaffoldMessenger.of(context).showSnackBar(
                       SnackBar(
                         content: Text(state.message),
@@ -192,10 +192,10 @@ class _AddClothPageState extends State<AddClothPage> {
                         ),
                       ),
                     );
-                  } else if (state is WardrobeLoadedState) {
+                  } else if (state is GalleryLoadedState) {
                     ScaffoldMessenger.of(context).showSnackBar(
                       SnackBar(
-                        content: const Text("Item added successfully!"),
+                        content: const Text("Pose added successfully!"),
                         backgroundColor: Colors.green.shade600,
                         behavior: SnackBarBehavior.floating,
                         shape: RoundedRectangleBorder(
@@ -217,7 +217,7 @@ class _AddClothPageState extends State<AddClothPage> {
                         GestureDetector(
                           onTap: _showImageSourceSheet,
                           child: Container(
-                            height: 220,
+                            height: 260,
                             width: double.infinity,
                             decoration: BoxDecoration(
                               color: Colors.white,
@@ -281,18 +281,26 @@ class _AddClothPageState extends State<AddClothPage> {
                                           ),
                                         ),
                                         child: const Icon(
-                                          Icons.add_photo_alternate_outlined,
+                                          Icons.add_a_photo_outlined,
                                           size: 40,
                                           color: AppTheme.primaryColor,
                                         ),
                                       ),
                                       const SizedBox(height: 12),
                                       const Text(
-                                        "Tap to add photo",
+                                        "Tap to add your photo",
                                         style: TextStyle(
                                           fontSize: 15,
                                           fontWeight: FontWeight.w500,
                                           color: AppTheme.textSecondary,
+                                        ),
+                                      ),
+                                      const SizedBox(height: 4),
+                                      Text(
+                                        "Choose a clear full-body or upper-body photo",
+                                        style: TextStyle(
+                                          fontSize: 12,
+                                          color: AppTheme.textLight,
                                         ),
                                       ),
                                     ],
@@ -302,9 +310,139 @@ class _AddClothPageState extends State<AddClothPage> {
 
                         const SizedBox(height: 28),
 
-                        // Item Name
+                        // Pose Type Selection
                         const Text(
-                          "Item Name",
+                          "Pose Type",
+                          style: TextStyle(
+                            fontSize: 13,
+                            fontWeight: FontWeight.w600,
+                            color: AppTheme.textSecondary,
+                            letterSpacing: 0.5,
+                          ),
+                        ),
+                        const SizedBox(height: 12),
+                        Wrap(
+                          spacing: 10,
+                          runSpacing: 10,
+                          children: _poseTypes.map((pose) {
+                            final isSelected = _selectedPose == pose['name'];
+                            return GestureDetector(
+                              onTap: () {
+                                setState(() {
+                                  _selectedPose = pose['name'];
+                                  if (pose['name'] != 'Custom') {
+                                    _poseNameController.text = pose['name'];
+                                  } else {
+                                    _poseNameController.clear();
+                                  }
+                                });
+                              },
+                              child: Container(
+                                padding: const EdgeInsets.symmetric(
+                                  horizontal: 16,
+                                  vertical: 12,
+                                ),
+                                decoration: BoxDecoration(
+                                  color: isSelected
+                                      ? AppTheme.primaryColor
+                                      : AppTheme.accentColor,
+                                  borderRadius: BorderRadius.circular(12),
+                                ),
+                                child: Row(
+                                  mainAxisSize: MainAxisSize.min,
+                                  children: [
+                                    Icon(
+                                      pose['icon'],
+                                      size: 18,
+                                      color: isSelected
+                                          ? Colors.white
+                                          : AppTheme.textSecondary,
+                                    ),
+                                    const SizedBox(width: 8),
+                                    Text(
+                                      pose['name'],
+                                      style: TextStyle(
+                                        fontSize: 14,
+                                        fontWeight: FontWeight.w500,
+                                        color: isSelected
+                                            ? Colors.white
+                                            : AppTheme.textPrimary,
+                                      ),
+                                    ),
+                                  ],
+                                ),
+                              ),
+                            );
+                          }).toList(),
+                        ),
+
+                        const SizedBox(height: 24),
+
+                        // Custom Pose Name (only if Custom is selected)
+                        if (_selectedPose == 'Custom') ...[
+                          const Text(
+                            "Custom Pose Name",
+                            style: TextStyle(
+                              fontSize: 13,
+                              fontWeight: FontWeight.w600,
+                              color: AppTheme.textSecondary,
+                              letterSpacing: 0.5,
+                            ),
+                          ),
+                          const SizedBox(height: 8),
+                          TextFormField(
+                            controller: _poseNameController,
+                            style: const TextStyle(
+                              fontSize: 16,
+                              color: AppTheme.textPrimary,
+                            ),
+                            decoration: InputDecoration(
+                              hintText: "Enter a name for this pose",
+                              hintStyle: TextStyle(color: AppTheme.textLight),
+                              prefixIcon: const Icon(
+                                Icons.edit_outlined,
+                                color: AppTheme.textSecondary,
+                              ),
+                              filled: true,
+                              fillColor: Colors.white,
+                              contentPadding: const EdgeInsets.symmetric(
+                                horizontal: 20,
+                                vertical: 18,
+                              ),
+                              border: OutlineInputBorder(
+                                borderRadius: BorderRadius.circular(14),
+                                borderSide: BorderSide(
+                                  color: Colors.grey.shade200,
+                                ),
+                              ),
+                              enabledBorder: OutlineInputBorder(
+                                borderRadius: BorderRadius.circular(14),
+                                borderSide: BorderSide(
+                                  color: Colors.grey.shade200,
+                                ),
+                              ),
+                              focusedBorder: OutlineInputBorder(
+                                borderRadius: BorderRadius.circular(14),
+                                borderSide: const BorderSide(
+                                  color: AppTheme.primaryColor,
+                                  width: 2,
+                                ),
+                              ),
+                            ),
+                            validator: (value) {
+                              if (_selectedPose == 'Custom' &&
+                                  (value == null || value.isEmpty)) {
+                                return 'Please enter a pose name';
+                              }
+                              return null;
+                            },
+                          ),
+                          const SizedBox(height: 20),
+                        ],
+
+                        // Description
+                        const Text(
+                          "Description (Optional)",
                           style: TextStyle(
                             fontSize: 13,
                             fontWeight: FontWeight.w600,
@@ -314,14 +452,19 @@ class _AddClothPageState extends State<AddClothPage> {
                         ),
                         const SizedBox(height: 8),
                         TextFormField(
-                          controller: _nameController,
+                          controller: _descriptionController,
+                          maxLines: 2,
                           style: const TextStyle(
                             fontSize: 16,
                             color: AppTheme.textPrimary,
                           ),
                           decoration: InputDecoration(
-                            hintText: "e.g., Blue Denim Jacket",
+                            hintText: "E.g., Casual outfit, Standing pose",
                             hintStyle: TextStyle(color: AppTheme.textLight),
+                            prefixIcon: const Icon(
+                              Icons.description_outlined,
+                              color: AppTheme.textSecondary,
+                            ),
                             filled: true,
                             fillColor: Colors.white,
                             contentPadding: const EdgeInsets.symmetric(
@@ -348,84 +491,14 @@ class _AddClothPageState extends State<AddClothPage> {
                               ),
                             ),
                           ),
-                          validator: (value) {
-                            if (value == null || value.isEmpty) {
-                              return "Please enter a name";
-                            }
-                            return null;
-                          },
-                        ),
-
-                        const SizedBox(height: 28),
-
-                        // Category Selection
-                        const Text(
-                          "Category",
-                          style: TextStyle(
-                            fontSize: 13,
-                            fontWeight: FontWeight.w600,
-                            color: AppTheme.textSecondary,
-                            letterSpacing: 0.5,
-                          ),
-                        ),
-                        const SizedBox(height: 12),
-                        Wrap(
-                          spacing: 10,
-                          runSpacing: 10,
-                          children: _categories.map((category) {
-                            final isSelected =
-                                _selectedCategory == category['name'];
-                            return GestureDetector(
-                              onTap: () {
-                                setState(() {
-                                  _selectedCategory = category['name'];
-                                });
-                              },
-                              child: Container(
-                                padding: const EdgeInsets.symmetric(
-                                  horizontal: 16,
-                                  vertical: 12,
-                                ),
-                                decoration: BoxDecoration(
-                                  color: isSelected
-                                      ? AppTheme.primaryColor
-                                      : AppTheme.accentColor,
-                                  borderRadius: BorderRadius.circular(12),
-                                ),
-                                child: Row(
-                                  mainAxisSize: MainAxisSize.min,
-                                  children: [
-                                    Icon(
-                                      category['icon'],
-                                      size: 18,
-                                      color: isSelected
-                                          ? Colors.white
-                                          : AppTheme.textSecondary,
-                                    ),
-                                    const SizedBox(width: 8),
-                                    Text(
-                                      category['name'],
-                                      style: TextStyle(
-                                        fontSize: 14,
-                                        fontWeight: FontWeight.w500,
-                                        color: isSelected
-                                            ? Colors.white
-                                            : AppTheme.textPrimary,
-                                      ),
-                                    ),
-                                  ],
-                                ),
-                              ),
-                            );
-                          }).toList(),
                         ),
 
                         const SizedBox(height: 40),
 
-                        // Save Button
-                        BlocBuilder<WardrobeBloc, WardrobeState>(
+                        // Submit Button
+                        BlocBuilder<GalleryBloc, GalleryState>(
                           builder: (context, state) {
-                            final isLoading = state is WardrobeLoadingState;
+                            final isLoading = state is GalleryLoadingState;
                             return SizedBox(
                               width: double.infinity,
                               height: 56,
@@ -433,33 +506,42 @@ class _AddClothPageState extends State<AddClothPage> {
                                 onPressed: isLoading
                                     ? null
                                     : () {
-                                        if (_formKey.currentState!.validate()) {
-                                          if (_selectedImage == null) {
-                                            ScaffoldMessenger.of(
-                                              context,
-                                            ).showSnackBar(
-                                              SnackBar(
-                                                content: const Text(
-                                                  "Please select an image",
-                                                ),
-                                                backgroundColor:
-                                                    AppTheme.secondaryColor,
-                                                behavior:
-                                                    SnackBarBehavior.floating,
-                                                shape: RoundedRectangleBorder(
-                                                  borderRadius:
-                                                      BorderRadius.circular(10),
-                                                ),
+                                        if (_selectedImage == null) {
+                                          ScaffoldMessenger.of(
+                                            context,
+                                          ).showSnackBar(
+                                            SnackBar(
+                                              content: const Text(
+                                                "Please select an image",
                                               ),
-                                            );
-                                            return;
-                                          }
-
-                                          context.read<WardrobeBloc>().add(
-                                            WardrobeAddClothingItemEvent(
+                                              backgroundColor:
+                                                  AppTheme.secondaryColor,
+                                              behavior:
+                                                  SnackBarBehavior.floating,
+                                              shape: RoundedRectangleBorder(
+                                                borderRadius:
+                                                    BorderRadius.circular(10),
+                                              ),
+                                            ),
+                                          );
+                                          return;
+                                        }
+                                        if (_formKey.currentState!.validate()) {
+                                          final poseName =
+                                              _selectedPose == 'Custom'
+                                              ? _poseNameController.text.trim()
+                                              : _selectedPose;
+                                          context.read<GalleryBloc>().add(
+                                            GalleryAddImageEvent(
                                               userId: widget.userId,
-                                              name: _nameController.text,
-                                              category: _selectedCategory,
+                                              poseName: poseName,
+                                              description:
+                                                  _descriptionController.text
+                                                      .trim()
+                                                      .isEmpty
+                                                  ? null
+                                                  : _descriptionController.text
+                                                        .trim(),
                                               imageFile: _selectedImage!,
                                             ),
                                           );
@@ -487,7 +569,7 @@ class _AddClothPageState extends State<AddClothPage> {
                                         ),
                                       )
                                     : const Text(
-                                        "Add to Wardrobe",
+                                        "Upload Pose",
                                         style: TextStyle(
                                           fontSize: 16,
                                           fontWeight: FontWeight.w600,
@@ -508,5 +590,12 @@ class _AddClothPageState extends State<AddClothPage> {
         ),
       ),
     );
+  }
+
+  @override
+  void dispose() {
+    _poseNameController.dispose();
+    _descriptionController.dispose();
+    super.dispose();
   }
 }

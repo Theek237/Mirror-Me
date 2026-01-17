@@ -10,9 +10,7 @@ sealed class WardrobeEvent extends Equatable {
 
 class WardrobeLoadWardrobeItemsEvent extends WardrobeEvent {
   final String userId;
-  const WardrobeLoadWardrobeItemsEvent({
-    required this.userId,
-  });
+  const WardrobeLoadWardrobeItemsEvent({required this.userId});
 }
 
 class WardrobeAddClothingItemEvent extends WardrobeEvent {

@@ -1,7 +1,7 @@
 import 'package:mm/features/auth/domain/entities/user_entity.dart';
 import 'package:supabase_flutter/supabase_flutter.dart';
 
-class UserModel extends UserEntity{
+class UserModel extends UserEntity {
   const UserModel({
     required super.uid,
     required super.email,
@@ -9,7 +9,7 @@ class UserModel extends UserEntity{
     super.photoUrl,
   });
 
-  factory UserModel.fromSupabaseUser(User user, {String? name}){
+  factory UserModel.fromSupabaseUser(User user, {String? name}) {
     return UserModel(
       uid: user.id,
       email: user.email ?? '',
@@ -28,11 +28,6 @@ class UserModel extends UserEntity{
   }
 
   Map<String, dynamic> toJson() {
-    return {
-      'id': uid,
-      'email': email,
-      'name': name,
-      'photo_url': photoUrl,
-    };
+    return {'id': uid, 'email': email, 'name': name, 'photo_url': photoUrl};
   }
 }

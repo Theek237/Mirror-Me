@@ -1,6 +1,6 @@
 import 'package:equatable/equatable.dart';
 
-class ClothingItemEntity extends Equatable{
+class ClothingItemEntity extends Equatable {
   final String id;
   final String name;
   final String category;

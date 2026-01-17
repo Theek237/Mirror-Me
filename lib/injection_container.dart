@@ -8,6 +8,10 @@ import 'package:mm/features/auth/domain/usecases/login_usecase.dart';
 import 'package:mm/features/auth/domain/usecases/logout_usecase.dart';
 import 'package:mm/features/auth/domain/usecases/register_usecase.dart';
 import 'package:mm/features/auth/presentation/bloc/auth%20bloc/auth_bloc.dart';
+import 'package:mm/features/gallery/data/datasources/gallery_remote_data_source.dart';
+import 'package:mm/features/gallery/data/repositories/gallery_repository_impl.dart';
+import 'package:mm/features/gallery/domain/repositories/gallery_repository.dart';
+import 'package:mm/features/gallery/presentation/bloc/gallery_bloc.dart';
 import 'package:mm/features/wardrobe/data/datasources/wardrobe_remote_data_source.dart';
 import 'package:mm/features/wardrobe/data/repositories/wardrobe_repository_impl.dart';
 import 'package:mm/features/wardrobe/domain/repositories/wardrobe_repository.dart';
@@ -40,9 +44,7 @@ Future<void> init() async {
   sl.registerLazySingleton(() => GetCurrentuserUsecase(repository: sl()));
   //Data Source
   sl.registerLazySingleton<AuthRemoteDataSource>(
-    () => AuthRemoteDataSourceImpl(
-      supabaseClient: sl(),
-    ),
+    () => AuthRemoteDataSourceImpl(supabaseClient: sl()),
   );
 
   //2. External (Supabase)
@@ -63,6 +65,21 @@ Future<void> init() async {
   //Data Source
   sl.registerLazySingleton<WardrobeRemoteDataSource>(
     () => WardrobeRemoteDataSourceImpl(supabaseClient: sl()),
+  );
+
+  //----------------------------------------------------//
+  //Gallery Feature
+  //BLoC
+  sl.registerFactory(() => GalleryBloc(repository: sl()));
+
+  //Repository
+  sl.registerLazySingleton<GalleryRepository>(
+    () => GalleryRepositoryImpl(remoteDataSource: sl()),
+  );
+
+  //Data Source
+  sl.registerLazySingleton<GalleryRemoteDataSource>(
+    () => GalleryRemoteDataSourceImpl(supabaseClient: sl()),
   );
 
   //----------------------------------------------------//
