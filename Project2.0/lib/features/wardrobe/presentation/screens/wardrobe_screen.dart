@@ -11,6 +11,7 @@ import 'package:image_picker/image_picker.dart';
 
 import 'package:mirror_me/core/di/injection.dart';
 import 'package:mirror_me/core/services/image_storage_service.dart';
+import 'package:mirror_me/core/services/local_wardrobe_cache.dart';
 import 'package:mirror_me/features/wardrobe/domain/entities/wardrobe_item.dart';
 import 'package:mirror_me/features/wardrobe/presentation/bloc/wardrobe_bloc.dart';
 import 'package:mirror_me/features/wardrobe/presentation/bloc/wardrobe_event.dart';
@@ -594,13 +595,40 @@ class _WardrobeScreenState extends State<WardrobeScreen> {
       }
     }
 
-    await docRef.set({
-      'name': name,
-      'category': category,
-      'color': color,
-      'imageUrl': imageUrl,
-      'createdAt': DateTime.now().toIso8601String(),
-    });
+    final createdAt = DateTime.now();
+
+    await LocalWardrobeCache.upsert(
+      uid,
+      WardrobeItem(
+        id: docRef.id,
+        name: name,
+        category: category,
+        color: color,
+        createdAt: createdAt,
+        imageUrl: imageUrl,
+      ),
+    );
+
+    try {
+      await docRef.set({
+        'name': name,
+        'category': category,
+        'color': color,
+        'imageUrl': imageUrl,
+        'createdAt': createdAt.toIso8601String(),
+      });
+    } catch (e) {
+      if (mounted) {
+        ScaffoldMessenger.of(context).showSnackBar(
+          SnackBar(
+            content: const Text(
+              'Saved locally. Cloud sync failed (check connection).',
+            ),
+            backgroundColor: AppTheme.error,
+          ),
+        );
+      }
+    }
 
     if (mounted) {
       ScaffoldMessenger.of(context).showSnackBar(

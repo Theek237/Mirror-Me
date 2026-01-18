@@ -13,6 +13,7 @@ import 'package:image_picker/image_picker.dart';
 
 import 'package:mirror_me/core/di/injection.dart';
 import 'package:mirror_me/core/services/gemini_service.dart';
+import 'package:mirror_me/core/services/local_wardrobe_cache.dart';
 import 'package:mirror_me/features/camera/presentation/camera_screen.dart';
 import 'package:mirror_me/features/tryon/presentation/bloc/tryon_bloc.dart';
 import 'package:mirror_me/features/tryon/presentation/bloc/tryon_event.dart';
@@ -133,9 +134,9 @@ class _TryOnScreenState extends State<TryOnScreen>
                       // API Configuration Warning
                       if (!_geminiService.isConfigured)
                         _buildApiWarning().animate().fadeIn(
-                          delay: 100.ms,
-                          duration: 400.ms,
-                        ),
+                              delay: 100.ms,
+                              duration: 400.ms,
+                            ),
 
                       if (!_geminiService.isConfigured)
                         const SizedBox(height: 16),
@@ -288,9 +289,8 @@ class _TryOnScreenState extends State<TryOnScreen>
       padding: EdgeInsets.zero,
       child: SizedBox(
         height: _userPhoto == null ? 280 : 240,
-        child: _userPhoto == null
-            ? _buildUploadSection()
-            : _buildPhotoPreview(),
+        child:
+            _userPhoto == null ? _buildUploadSection() : _buildPhotoPreview(),
       ),
     );
   }
@@ -514,24 +514,54 @@ class _TryOnScreenState extends State<TryOnScreen>
             if (snapshot.connectionState == ConnectionState.waiting) {
               return const Center(child: CyberLoader(size: 30));
             }
-
             final docs = snapshot.data?.docs ?? [];
-            if (docs.isEmpty) {
-              return NeonCard(
-                glowColor: AppTheme.neonCyan,
-                padding: const EdgeInsets.all(20),
-                child: Row(
-                  children: [
-                    const Icon(Icons.info_outline, color: AppTheme.neonCyan),
-                    const SizedBox(width: 12),
-                    Expanded(
-                      child: Text(
-                        'Add items to your wardrobe first to use AI Try-On',
-                        style: AppTheme.bodyMedium,
+            if (snapshot.hasError || docs.isEmpty) {
+              return FutureBuilder(
+                future: LocalWardrobeCache.load(uid),
+                builder: (context, localSnapshot) {
+                  final items = localSnapshot.data ?? [];
+                  if (items.isEmpty) {
+                    return NeonCard(
+                      glowColor: AppTheme.neonCyan,
+                      padding: const EdgeInsets.all(20),
+                      child: Row(
+                        children: [
+                          const Icon(
+                            Icons.info_outline,
+                            color: AppTheme.neonCyan,
+                          ),
+                          const SizedBox(width: 12),
+                          Expanded(
+                            child: Text(
+                              'Add items to your wardrobe first to use AI Try-On',
+                              style: AppTheme.bodyMedium,
+                            ),
+                          ),
+                        ],
                       ),
+                    );
+                  }
+
+                  return SizedBox(
+                    height: 150,
+                    child: ListView.builder(
+                      scrollDirection: Axis.horizontal,
+                      physics: const BouncingScrollPhysics(),
+                      itemCount: items.length,
+                      itemBuilder: (context, index) {
+                        final item = items[index];
+                        final isSelected = _selectedItemId == item.id;
+
+                        return _buildOutfitCard(
+                          id: item.id,
+                          name: item.name,
+                          imageUrl: item.imageUrl,
+                          isSelected: isSelected,
+                        );
+                      },
                     ),
-                  ],
-                ),
+                  );
+                },
               );
             }
 
@@ -1151,14 +1181,14 @@ class _TryOnScreenState extends State<TryOnScreen>
 
     final photoBytes = await _userPhoto!.readAsBytes();
     blocContext.read<TryOnBloc>().add(
-      SubmitTryOnRequested(
-        userId: uid,
-        photoBytes: photoBytes,
-        wardrobeItemId: _selectedItemId!,
-        wardrobeItemName: _selectedItemName ?? 'clothing item',
-        wardrobeItemImageUrl: _selectedItemImageUrl,
-      ),
-    );
+          SubmitTryOnRequested(
+            userId: uid,
+            photoBytes: photoBytes,
+            wardrobeItemId: _selectedItemId!,
+            wardrobeItemName: _selectedItemName ?? 'clothing item',
+            wardrobeItemImageUrl: _selectedItemImageUrl,
+          ),
+        );
   }
 
   Color _getStatusColor(String status) {
