@@ -19,10 +19,8 @@ class AppConfig {
     if (geminiApiKey.isNotEmpty) {
       return geminiApiKey;
     }
-    // For development, you can temporarily set your key here
-    // Remember to remove it before committing!
-    const devKey = 'AIzaSyDDZspZHezsmv19Wdq_IIcU3_vgFnl4inY';
-    return devKey;
+    // For development, provide the key via --dart-define or environment.
+    return '';
   }
 
   // ═══════════════════════════════════════════════════════════════════════════
@@ -52,18 +50,16 @@ class AppConfig {
     if (supabaseUrl.isNotEmpty) {
       return supabaseUrl;
     }
-    // Your Supabase project URL
-    const devUrl = 'https://zdijdwblemdtxpykfaxo.supabase.co';
-    return devUrl;
+    // Provide via --dart-define or environment.
+    return '';
   }
 
   static String getSupabaseAnonKey() {
     if (supabaseAnonKey.isNotEmpty) {
       return supabaseAnonKey;
     }
-    // Your Supabase anon key
-    const devKey = 'eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6InpkaWpkd2JsZW1kdHhweWtmYXhvIiwicm9sZSI6ImFub24iLCJpYXQiOjE3MzcxNTIwMDAsImV4cCI6MjA1MjcyODAwMH0.sb_publishable_w6DhxGZ4EvkeyqyTW8H5xw_U8SuWMip';
-    return devKey;
+    // Provide via --dart-define or environment.
+    return '';
   }
 
   // Supabase Storage Bucket Names
