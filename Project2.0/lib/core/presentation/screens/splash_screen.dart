@@ -16,8 +16,10 @@ class _SplashScreenState extends State<SplashScreen> {
   @override
   void initState() {
     super.initState();
+    print('💫 SplashScreen initState');
     Future.delayed(const Duration(milliseconds: 2500), () {
       if (mounted && widget.onComplete != null) {
+        print('💫 SplashScreen onComplete callback');
         widget.onComplete!();
       }
     });
@@ -25,6 +27,7 @@ class _SplashScreenState extends State<SplashScreen> {
 
   @override
   Widget build(BuildContext context) {
+    print('💫 SplashScreen build');
     return Scaffold(
       backgroundColor: AppTheme.backgroundDark,
       body: Center(

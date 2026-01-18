@@ -20,9 +20,11 @@ class _AuthGateState extends State<AuthGate> {
   @override
   void initState() {
     super.initState();
+    print('🔐 AuthGate initState');
     // Show splash screen for a brief moment then check auth
     Future.delayed(const Duration(milliseconds: 1500), () {
       if (mounted) {
+        print('🔐 AuthGate hiding splash screen');
         setState(() => _showSplash = false);
       }
     });
@@ -30,15 +32,20 @@ class _AuthGateState extends State<AuthGate> {
 
   @override
   Widget build(BuildContext context) {
+    print('🔐 AuthGate build - showSplash: $_showSplash');
     // Show splash screen initially
     if (_showSplash) {
       return const SplashScreen();
     }
 
     return BlocProvider(
-      create: (_) => sl<AuthSessionCubit>(),
+      create: (_) {
+        print('🔐 Creating AuthSessionCubit');
+        return sl<AuthSessionCubit>();
+      },
       child: BlocBuilder<AuthSessionCubit, AuthSessionState>(
         builder: (context, state) {
+          print('🔐 AuthSession state: ${state.status}');
           if (state.status == AuthSessionStatus.unknown) {
             return const SplashScreen();
           }
