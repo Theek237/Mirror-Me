@@ -50,16 +50,16 @@ class AppConfig {
     if (supabaseUrl.isNotEmpty) {
       return supabaseUrl;
     }
-    // Provide via --dart-define or environment.
-    return '';
+    // Development fallback
+    return 'https://zdijdwblemdtxpykfaxo.supabase.co';
   }
 
   static String getSupabaseAnonKey() {
     if (supabaseAnonKey.isNotEmpty) {
       return supabaseAnonKey;
     }
-    // Provide via --dart-define or environment.
-    return '';
+    // Development fallback
+    return 'sb_publishable_w6DhxGZ4EvkeyqyTW8H5xw_U8SuWMip';
   }
 
   // Supabase Storage Bucket Names
