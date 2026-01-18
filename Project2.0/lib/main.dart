@@ -3,6 +3,7 @@ import 'package:flutter/material.dart';
 
 import 'core/config/app_config.dart';
 import 'core/di/injection.dart';
+import 'core/services/image_storage_service.dart';
 import 'core/services/supabase_service.dart';
 import 'features/auth/presentation/screens/auth_gate.dart';
 import 'firebase_options.dart';
@@ -37,6 +38,10 @@ Future<void> main() async {
         supabaseAnonKey: supabaseKey,
       );
       print('✓ Supabase initialized');
+      
+      // Switch to Supabase for image storage
+      ImageStorageService.setProvider(StorageProvider.supabase);
+      print('✓ Using Supabase for image storage');
     } catch (e) {
       print('⚠️  Supabase initialization error: $e');
     }
