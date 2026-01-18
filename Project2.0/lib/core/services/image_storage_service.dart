@@ -93,36 +93,63 @@ class ImageStorageService {
     required Uint8List imageBytes,
   }) async {
     Future<String?> attemptUpload(FirebaseStorage storage) async {
-      final ref = storage.ref('users/$userId/$folder/$fileName');
+      try {
+        final ref = storage.ref('users/$userId/$folder/$fileName');
+        debugPrint('Attempting Firebase upload to: users/$userId/$folder/$fileName');
+        
+        final uploadTask = ref.putData(
+          imageBytes,
+          SettableMetadata(
+            contentType: 'image/jpeg',
+            customMetadata: {
+              'uploadedAt': DateTime.now().toIso8601String(),
+              'userId': userId,
+            },
+          ),
+        );
 
-      await ref.putData(
-        imageBytes,
-        SettableMetadata(contentType: 'image/jpeg'),
-      );
-
-      final url = await ref.getDownloadURL();
-      debugPrint('Firebase upload successful: $url');
-      return url;
+        // Wait for upload to complete
+        final snapshot = await uploadTask;
+        debugPrint('Upload state: ${snapshot.state}');
+        
+        if (snapshot.state == TaskState.success) {
+          final url = await ref.getDownloadURL();
+          debugPrint('✅ Firebase upload successful: $url');
+          return url;
+        } else {
+          debugPrint('❌ Upload failed with state: ${snapshot.state}');
+          return null;
+        }
+      } catch (e, stackTrace) {
+        debugPrint('❌ Firebase upload error: $e');
+        debugPrint('Stack trace: $stackTrace');
+        rethrow;
+      }
     }
 
+    // Try default bucket first
     try {
+      debugPrint('🔄 Trying default Firebase Storage bucket...');
       return await attemptUpload(FirebaseStorage.instance);
     } catch (e) {
-      debugPrint('Firebase upload failed: $e');
+      debugPrint('⚠️ Default bucket failed: $e');
     }
 
+    // Try fallback bucket with project ID
     try {
       final projectId = Firebase.app().options.projectId;
       if (projectId.isNotEmpty) {
+        debugPrint('🔄 Trying fallback bucket: gs://$projectId.appspot.com');
         final fallbackStorage = FirebaseStorage.instanceFor(
           bucket: 'gs://$projectId.appspot.com',
         );
         return await attemptUpload(fallbackStorage);
       }
     } catch (e) {
-      debugPrint('Firebase upload fallback failed: $e');
+      debugPrint('⚠️ Fallback bucket failed: $e');
     }
 
+    debugPrint('❌ All Firebase upload attempts failed');
     return null;
   }
 
