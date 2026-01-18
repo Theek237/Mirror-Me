@@ -1,0 +1,14 @@
+.DS_Store
+.idea/
+
+# Flutter
+Project2.0/.dart_tool/
+Project2.0/build/
+Project2.0/.flutter-plugins
+Project2.0/.flutter-plugins-dependencies
+Project2.0/.metadata
+
+# Dart/Flutter tool caches
+.dart_tool/
+build/
+
