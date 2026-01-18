@@ -1,6 +1,7 @@
 import 'dart:io';
 import 'dart:typed_data';
 
+import 'package:firebase_core/firebase_core.dart';
 import 'package:firebase_storage/firebase_storage.dart';
 import 'package:flutter/foundation.dart';
 import 'package:image_picker/image_picker.dart';
@@ -49,7 +50,8 @@ class ImageStorageService {
     required String fileName,
     required Uint8List imageBytes,
   }) async {
-    if (_provider == StorageProvider.supabase && SupabaseService.isInitialized) {
+    if (_provider == StorageProvider.supabase &&
+        SupabaseService.isInitialized) {
       return _uploadToSupabase(
         userId: userId,
         folder: folder,
@@ -90,8 +92,7 @@ class ImageStorageService {
     required String fileName,
     required Uint8List imageBytes,
   }) async {
-    try {
-      final storage = FirebaseStorage.instance;
+    Future<String?> attemptUpload(FirebaseStorage storage) async {
       final ref = storage.ref('users/$userId/$folder/$fileName');
 
       await ref.putData(
@@ -102,10 +103,27 @@ class ImageStorageService {
       final url = await ref.getDownloadURL();
       debugPrint('Firebase upload successful: $url');
       return url;
+    }
+
+    try {
+      return await attemptUpload(FirebaseStorage.instance);
     } catch (e) {
       debugPrint('Firebase upload failed: $e');
-      return null;
     }
+
+    try {
+      final projectId = Firebase.app().options.projectId;
+      if (projectId.isNotEmpty) {
+        final fallbackStorage = FirebaseStorage.instanceFor(
+          bucket: 'gs://$projectId.appspot.com',
+        );
+        return await attemptUpload(fallbackStorage);
+      }
+    } catch (e) {
+      debugPrint('Firebase upload fallback failed: $e');
+    }
+
+    return null;
   }
 
   /// Upload from File (non-web platforms)
@@ -116,7 +134,8 @@ class ImageStorageService {
     required File file,
   }) async {
     if (kIsWeb) {
-      debugPrint('File upload not supported on web, use uploadImageBytes instead');
+      debugPrint(
+          'File upload not supported on web, use uploadImageBytes instead');
       return null;
     }
 
@@ -140,7 +159,8 @@ class ImageStorageService {
     required String folder,
     required String fileName,
   }) async {
-    if (_provider == StorageProvider.supabase && SupabaseService.isInitialized) {
+    if (_provider == StorageProvider.supabase &&
+        SupabaseService.isInitialized) {
       final bucket = _getBucketForFolder(folder);
       final path = '$userId/$folder/$fileName';
       return SupabaseService.deleteImage(bucket: bucket, path: path);

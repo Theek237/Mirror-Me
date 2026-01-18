@@ -609,19 +609,27 @@ class _TryOnScreenState extends State<TryOnScreen>
                           ),
                         ),
                       )
-                    : CachedNetworkImage(
-                        imageUrl: imageUrl,
-                        fit: BoxFit.cover,
-                        width: double.infinity,
-                        placeholder: (context, url) => Container(
-                          color: AppTheme.surfaceLight,
-                          child: const Center(child: CyberLoader(size: 20)),
-                        ),
-                        errorWidget: (context, url, error) => Container(
-                          color: AppTheme.surfaceLight,
-                          child: const Icon(Icons.error_outline),
-                        ),
-                      ),
+                    : imageUrl.startsWith('file://')
+                        ? Image.file(
+                            File(Uri.parse(imageUrl).toFilePath()),
+                            fit: BoxFit.cover,
+                            width: double.infinity,
+                          )
+                        : CachedNetworkImage(
+                            imageUrl: imageUrl,
+                            fit: BoxFit.cover,
+                            width: double.infinity,
+                            placeholder: (context, url) => Container(
+                              color: AppTheme.surfaceLight,
+                              child: const Center(
+                                child: CyberLoader(size: 20),
+                              ),
+                            ),
+                            errorWidget: (context, url, error) => Container(
+                              color: AppTheme.surfaceLight,
+                              child: const Icon(Icons.error_outline),
+                            ),
+                          ),
               ),
             ),
             Container(
