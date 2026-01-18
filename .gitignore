@@ -43,3 +43,10 @@ app.*.map.json
 /android/app/debug
 /android/app/profile
 /android/app/release
+
+# Secrets and service configs (Project2.0)
+Project2.0/android/app/google-services.json
+Project2.0/ios/Runner/GoogleService-Info.plist
+Project2.0/macos/Runner/GoogleService-Info.plist
+Project2.0/lib/firebase_options.dart
+Project2.0/firebase.json
