@@ -1,11 +1,11 @@
+import 'dart:convert';
 import 'dart:typed_data';
-import 'package:google_generative_ai/google_generative_ai.dart'
-    hide ServerException;
+import 'package:dio/dio.dart';
 import 'package:mm/core/errors/exception.dart';
 import 'package:mm/core/constants/gemini_config.dart';
 
 abstract class GeminiRemoteDataSource {
-  /// Generates a virtual try-on image using Gemini 3 Pro Image (Nano Banana Pro)
+  /// Generates a virtual try-on image using Gemini Image Generation API
   Future<Uint8List> generateTryOnImage({
     required Uint8List poseImageBytes,
     required Uint8List clothingImageBytes,
@@ -15,18 +15,15 @@ abstract class GeminiRemoteDataSource {
 
 class GeminiRemoteDataSourceImpl implements GeminiRemoteDataSource {
   final String apiKey;
-  late final GenerativeModel _model;
+  final Dio _dio;
 
-  GeminiRemoteDataSourceImpl({required this.apiKey}) {
-    _model = GenerativeModel(
-      model: GeminiConfig.imageModel, // Use model from config
-      apiKey: apiKey,
-      generationConfig: GenerationConfig(
-        temperature: 1.0,
-        maxOutputTokens: 8192,
-      ),
-    );
-  }
+  GeminiRemoteDataSourceImpl({required this.apiKey})
+    : _dio = Dio(
+        BaseOptions(
+          connectTimeout: const Duration(seconds: 60),
+          receiveTimeout: const Duration(seconds: 120),
+        ),
+      );
 
   @override
   Future<Uint8List> generateTryOnImage({
@@ -51,49 +48,106 @@ IMPORTANT INSTRUCTIONS:
 
 Generate ONE high-quality photorealistic result image.''';
 
-      final content = [
-        Content.multi([
-          TextPart(prompt),
-          TextPart('\n\nPOSE IMAGE (the person to dress):'),
-          DataPart('image/jpeg', poseImageBytes),
-          TextPart('\n\nCLOTHING IMAGE (the item to wear):'),
-          DataPart('image/jpeg', clothingImageBytes),
-          TextPart(
-            '\n\nNow generate the virtual try-on result showing the person wearing this clothing:',
-          ),
-        ]),
-      ];
+      // Convert images to base64
+      final poseImageBase64 = base64Encode(poseImageBytes);
+      final clothingImageBase64 = base64Encode(clothingImageBytes);
 
-      final response = await _model.generateContent(content);
+      // Build request body for Gemini API with image generation
+      final requestBody = {
+        'contents': [
+          {
+            'parts': [
+              {'text': prompt},
+              {'text': '\n\nPOSE IMAGE (the person to dress):'},
+              {
+                'inline_data': {
+                  'mime_type': 'image/jpeg',
+                  'data': poseImageBase64,
+                },
+              },
+              {'text': '\n\nCLOTHING IMAGE (the item to wear):'},
+              {
+                'inline_data': {
+                  'mime_type': 'image/jpeg',
+                  'data': clothingImageBase64,
+                },
+              },
+              {
+                'text':
+                    '\n\nNow generate the virtual try-on result showing the person wearing this clothing:',
+              },
+            ],
+          },
+        ],
+        'generationConfig': {
+          'temperature': 1.0,
+          'maxOutputTokens': 8192,
+          'responseModalities': ['TEXT', 'IMAGE'],
+        },
+      };
 
-      // Extract generated image from response
-      if (response.candidates.isNotEmpty) {
-        final candidate = response.candidates.first;
-        if (candidate.content.parts.isNotEmpty) {
-          for (final part in candidate.content.parts) {
-            if (part is DataPart) {
-              // Found generated image
-              return Uint8List.fromList(part.bytes);
+      // Make API request
+      final response = await _dio.post(
+        'https://generativelanguage.googleapis.com/v1beta/models/${GeminiConfig.imageModel}:generateContent?key=$apiKey',
+        data: requestBody,
+        options: Options(headers: {'Content-Type': 'application/json'}),
+      );
+
+      if (response.statusCode == 200) {
+        final data = response.data;
+
+        // Extract image from response
+        if (data['candidates'] != null && data['candidates'].isNotEmpty) {
+          final candidate = data['candidates'][0];
+          if (candidate['content'] != null &&
+              candidate['content']['parts'] != null) {
+            final parts = candidate['content']['parts'] as List;
+
+            for (final part in parts) {
+              // Check for inline_data (image response)
+              if (part['inlineData'] != null) {
+                final imageData = part['inlineData']['data'] as String;
+                return base64Decode(imageData);
+              }
+            }
+
+            // If no image, check for text response (error explanation)
+            for (final part in parts) {
+              if (part['text'] != null) {
+                final textResponse = part['text'] as String;
+                if (textResponse.isNotEmpty) {
+                  throw ServerException(
+                    message:
+                        'AI could not generate image. Response: ${textResponse.substring(0, textResponse.length > 200 ? 200 : textResponse.length)}',
+                  );
+                }
+              }
             }
           }
         }
-      }
 
-      // If no image in response, check if it's a text response explaining why
-      final textResponse = response.text;
-      if (textResponse != null && textResponse.isNotEmpty) {
         throw ServerException(
           message:
-              'AI could not generate image. Response: ${textResponse.substring(0, textResponse.length > 200 ? 200 : textResponse.length)}',
+              'No image generated. Please try again with different images.',
+        );
+      } else {
+        throw ServerException(
+          message: 'API request failed with status: ${response.statusCode}',
         );
       }
+    } on DioException catch (e) {
+      String errorMessage = 'Network error occurred';
 
-      throw ServerException(
-        message: 'No image generated. Please try again with different images.',
-      );
-    } on GenerativeAIException catch (e) {
-      throw ServerException(message: 'AI generation failed: ${e.message}');
+      if (e.response != null) {
+        final errorData = e.response?.data;
+        if (errorData is Map && errorData['error'] != null) {
+          errorMessage = errorData['error']['message'] ?? errorMessage;
+        }
+      }
+
+      throw ServerException(message: 'AI generation failed: $errorMessage');
     } catch (e) {
+      if (e is ServerException) rethrow;
       throw ServerException(message: 'Failed to generate try-on image: $e');
     }
   }
