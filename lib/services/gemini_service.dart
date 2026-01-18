@@ -87,7 +87,8 @@ class GeminiService {
       String userDescription = await _analyzeUserForImageGen(userPhoto);
 
       // Create a detailed prompt for virtual try-on
-      final prompt = '''
+      final prompt =
+          '''
 Create a photorealistic fashion photograph of a person wearing $clothingDescription.
 The person should match this description: $userDescription
 Style: Professional fashion photography, full body shot, clean background, natural lighting.
@@ -98,21 +99,25 @@ High quality, detailed, fashion magazine style.
       debugPrint('Generating image with Imagen 3...');
 
       // Use REST API for Imagen 3
-      final response = await http.post(
-        Uri.parse('https://generativelanguage.googleapis.com/v1beta/models/imagen-3.0-generate-002:predict?key=$_apiKey'),
-        headers: {'Content-Type': 'application/json'},
-        body: json.encode({
-          'instances': [
-            {'prompt': prompt}
-          ],
-          'parameters': {
-            'sampleCount': 1,
-            'aspectRatio': '3:4',
-            'safetyFilterLevel': 'block_few',
-            'personGeneration': 'allow_adult',
-          }
-        }),
-      ).timeout(const Duration(seconds: 60));
+      final response = await http
+          .post(
+            Uri.parse(
+              'https://generativelanguage.googleapis.com/v1beta/models/imagen-3.0-generate-002:predict?key=$_apiKey',
+            ),
+            headers: {'Content-Type': 'application/json'},
+            body: json.encode({
+              'instances': [
+                {'prompt': prompt},
+              ],
+              'parameters': {
+                'sampleCount': 1,
+                'aspectRatio': '3:4',
+                'safetyFilterLevel': 'block_few',
+                'personGeneration': 'allow_adult',
+              },
+            }),
+          )
+          .timeout(const Duration(seconds: 60));
 
       if (response.statusCode == 200) {
         final data = json.decode(response.body);
@@ -132,7 +137,11 @@ High quality, detailed, fashion magazine style.
 
       // If Imagen fails, try with Gemini 2.0 Flash which has native image generation
       debugPrint('Imagen 3 failed, trying Gemini native image generation...');
-      return await _generateWithGeminiNative(prompt, userPhoto, clothingDescription);
+      return await _generateWithGeminiNative(
+        prompt,
+        userPhoto,
+        clothingDescription,
+      );
     } catch (e) {
       debugPrint('Imagen generation error: $e');
       // Fallback to Gemini native
@@ -162,15 +171,12 @@ Keep it to 2-3 sentences, factual and respectful.
 ''';
 
       final content = [
-        Content.multi([
-          TextPart(prompt),
-          DataPart('image/jpeg', userPhoto),
-        ])
+        Content.multi([TextPart(prompt), DataPart('image/jpeg', userPhoto)]),
       ];
 
-      final response = await _visionModel!.generateContent(content).timeout(
-        const Duration(seconds: 15),
-      );
+      final response = await _visionModel!
+          .generateContent(content)
+          .timeout(const Duration(seconds: 15));
 
       return response.text ?? 'a stylish person';
     } catch (e) {
@@ -187,22 +193,26 @@ Keep it to 2-3 sentences, factual and respectful.
   ) async {
     try {
       // Try Gemini 2.0 Flash experimental with image generation
-      final response = await http.post(
-        Uri.parse('https://generativelanguage.googleapis.com/v1beta/models/gemini-2.0-flash-exp:generateContent?key=$_apiKey'),
-        headers: {'Content-Type': 'application/json'},
-        body: json.encode({
-          'contents': [
-            {
-              'parts': [
-                {'text': 'Generate an image of: $prompt'},
-              ]
-            }
-          ],
-          'generationConfig': {
-            'responseModalities': ['TEXT', 'IMAGE'],
-          }
-        }),
-      ).timeout(const Duration(seconds: 60));
+      final response = await http
+          .post(
+            Uri.parse(
+              'https://generativelanguage.googleapis.com/v1beta/models/gemini-2.0-flash-exp:generateContent?key=$_apiKey',
+            ),
+            headers: {'Content-Type': 'application/json'},
+            body: json.encode({
+              'contents': [
+                {
+                  'parts': [
+                    {'text': 'Generate an image of: $prompt'},
+                  ],
+                },
+              ],
+              'generationConfig': {
+                'responseModalities': ['TEXT', 'IMAGE'],
+              },
+            }),
+          )
+          .timeout(const Duration(seconds: 60));
 
       if (response.statusCode == 200) {
         final data = json.decode(response.body);
@@ -224,7 +234,9 @@ Keep it to 2-3 sentences, factual and respectful.
         }
       }
 
-      debugPrint('Gemini native image generation response: ${response.statusCode}');
+      debugPrint(
+        'Gemini native image generation response: ${response.statusCode}',
+      );
 
       // If image generation fails, return analysis-only result
       return {
@@ -258,17 +270,21 @@ Keep it to 2-3 sentences, factual and respectful.
         {
           'title': 'Add Items First',
           'items': ['Please add clothing items to your wardrobe'],
-          'tip': 'Upload photos of your clothes to get personalized AI recommendations.',
-        }
+          'tip':
+              'Upload photos of your clothes to get personalized AI recommendations.',
+        },
       ];
     }
 
     try {
-      final itemDescriptions = wardrobeItems.map((item) {
-        return '${item['name']} (${item['category']}, ${item['color']})';
-      }).join(', ');
+      final itemDescriptions = wardrobeItems
+          .map((item) {
+            return '${item['name']} (${item['category']}, ${item['color']})';
+          })
+          .join(', ');
 
-      final prompt = '''
+      final prompt =
+          '''
 You are a professional fashion stylist AI. Based on the following wardrobe items and occasion, create 3 unique, stylish outfit recommendations.
 
 Available Wardrobe Items: $itemDescriptions
@@ -311,12 +327,14 @@ You MUST respond with valid JSON only, no other text:
 
       debugPrint('Sending recommendation request to Gemini...');
       final content = [Content.text(prompt)];
-      final response = await _model!.generateContent(content).timeout(
-        const Duration(seconds: 30),
-        onTimeout: () {
-          throw Exception('Request timed out');
-        },
-      );
+      final response = await _model!
+          .generateContent(content)
+          .timeout(
+            const Duration(seconds: 30),
+            onTimeout: () {
+              throw Exception('Request timed out');
+            },
+          );
 
       if (response.text != null && response.text!.isNotEmpty) {
         debugPrint('Received response from Gemini');
@@ -326,7 +344,9 @@ You MUST respond with valid JSON only, no other text:
 
           if (parsed is Map && parsed.containsKey('outfits')) {
             final outfits = List<Map<String, dynamic>>.from(
-              (parsed['outfits'] as List).map((e) => Map<String, dynamic>.from(e))
+              (parsed['outfits'] as List).map(
+                (e) => Map<String, dynamic>.from(e),
+              ),
             );
             debugPrint('Successfully parsed ${outfits.length} outfits');
             return outfits;
@@ -354,7 +374,8 @@ You MUST respond with valid JSON only, no other text:
     if (!_isInitialized || _visionModel == null) {
       return {
         'success': false,
-        'description': 'AI service not configured. Please check your Gemini API key in settings.',
+        'description':
+            'AI service not configured. Please check your Gemini API key in settings.',
         'status': 'failed',
       };
     }
@@ -364,9 +385,9 @@ You MUST respond with valid JSON only, no other text:
       Uint8List? clothingImageBytes;
       if (clothingImageUrl != null && clothingImageUrl.isNotEmpty) {
         try {
-          final response = await http.get(Uri.parse(clothingImageUrl)).timeout(
-            const Duration(seconds: 10),
-          );
+          final response = await http
+              .get(Uri.parse(clothingImageUrl))
+              .timeout(const Duration(seconds: 10));
           if (response.statusCode == 200) {
             clothingImageBytes = response.bodyBytes;
           }
@@ -384,7 +405,8 @@ You MUST respond with valid JSON only, no other text:
       );
 
       // Now generate the text analysis
-      final prompt = '''
+      final prompt =
+          '''
 You are an expert fashion stylist and virtual try-on assistant. Analyze this photo of a person and provide a detailed virtual try-on assessment for: $clothingDescription
 
 Please provide a comprehensive analysis including:
@@ -421,9 +443,9 @@ Be encouraging, specific, and provide actionable fashion advice!
       }
 
       final content = [Content.multi(parts)];
-      final response = await _visionModel!.generateContent(content).timeout(
-        const Duration(seconds: 45),
-      );
+      final response = await _visionModel!
+          .generateContent(content)
+          .timeout(const Duration(seconds: 45));
 
       if (response.text != null && response.text!.isNotEmpty) {
         final analysis = _parseStyleAnalysis(response.text!);
@@ -440,7 +462,8 @@ Be encouraging, specific, and provide actionable fashion advice!
 
       return {
         'success': true,
-        'description': 'This outfit would look great on you! The $clothingDescription complements your style beautifully.',
+        'description':
+            'This outfit would look great on you! The $clothingDescription complements your style beautifully.',
         'status': 'completed',
         'hasGeneratedImage': imageGenResult['success'] == true,
         'generatedImageBytes': imageGenResult['generatedImageBytes'],
@@ -449,7 +472,8 @@ Be encouraging, specific, and provide actionable fashion advice!
       debugPrint('Gemini try-on error: $e');
       return {
         'success': false,
-        'description': 'Unable to generate try-on preview. Please try again later.',
+        'description':
+            'Unable to generate try-on preview. Please try again later.',
         'status': 'failed',
       };
     }
@@ -469,11 +493,14 @@ Be encouraging, specific, and provide actionable fashion advice!
     }
 
     try {
-      final itemsDescription = selectedItems.map((item) {
-        return '${item['name']} (${item['category']}, ${item['color']})';
-      }).join(', ');
+      final itemsDescription = selectedItems
+          .map((item) {
+            return '${item['name']} (${item['category']}, ${item['color']})';
+          })
+          .join(', ');
 
-      final prompt = '''
+      final prompt =
+          '''
 You are an expert fashion stylist. Analyze this photo and create a detailed visualization of how this person would look wearing the following outfit:
 
 OUTFIT ITEMS: $itemsDescription
@@ -497,19 +524,18 @@ Be detailed, encouraging, and help the person visualize exactly how amazing they
 ''';
 
       final content = [
-        Content.multi([
-          TextPart(prompt),
-          DataPart('image/jpeg', userPhoto),
-        ])
+        Content.multi([TextPart(prompt), DataPart('image/jpeg', userPhoto)]),
       ];
 
-      final response = await _visionModel!.generateContent(content).timeout(
-        const Duration(seconds: 45),
-      );
+      final response = await _visionModel!
+          .generateContent(content)
+          .timeout(const Duration(seconds: 45));
 
       return {
         'success': true,
-        'description': response.text ?? 'This outfit combination would look fantastic on you!',
+        'description':
+            response.text ??
+            'This outfit combination would look fantastic on you!',
         'items': selectedItems.map((i) => i['name']).toList(),
         'status': 'completed',
       };
@@ -532,11 +558,14 @@ Be detailed, encouraging, and help the person visualize exactly how amazing they
     }
 
     try {
-      final itemDescriptions = wardrobeItems.map((item) {
-        return '${item['name']} (${item['category']}, ${item['color']})';
-      }).join('\n');
+      final itemDescriptions = wardrobeItems
+          .map((item) {
+            return '${item['name']} (${item['category']}, ${item['color']})';
+          })
+          .join('\n');
 
-      final prompt = '''
+      final prompt =
+          '''
 Analyze this wardrobe and provide fashion insights:
 
 Wardrobe Items:
@@ -553,9 +582,9 @@ Respond with valid JSON only:
 ''';
 
       final content = [Content.text(prompt)];
-      final response = await _model!.generateContent(content).timeout(
-        const Duration(seconds: 30),
-      );
+      final response = await _model!
+          .generateContent(content)
+          .timeout(const Duration(seconds: 30));
 
       if (response.text != null) {
         final jsonStr = _extractJson(response.text!);
@@ -578,7 +607,8 @@ Respond with valid JSON only:
     }
 
     try {
-      final prompt = '''
+      final prompt =
+          '''
 Based on these style quiz answers, determine the person's fashion personality:
 
 ${answers.entries.map((e) => '${e.key}: ${e.value}').join('\n')}
@@ -595,9 +625,9 @@ Respond with valid JSON only:
 ''';
 
       final content = [Content.text(prompt)];
-      final response = await _model!.generateContent(content).timeout(
-        const Duration(seconds: 30),
-      );
+      final response = await _model!
+          .generateContent(content)
+          .timeout(const Duration(seconds: 30));
 
       if (response.text != null) {
         final jsonStr = _extractJson(response.text!);
@@ -640,23 +670,17 @@ Respond with valid JSON only:
 ''';
 
       final content = [
-        Content.multi([
-          TextPart(prompt),
-          DataPart('image/jpeg', imageBytes),
-        ])
+        Content.multi([TextPart(prompt), DataPart('image/jpeg', imageBytes)]),
       ];
 
-      final response = await _visionModel!.generateContent(content).timeout(
-        const Duration(seconds: 30),
-      );
+      final response = await _visionModel!
+          .generateContent(content)
+          .timeout(const Duration(seconds: 30));
 
       if (response.text != null) {
         final jsonStr = _extractJson(response.text!);
         final result = json.decode(jsonStr);
-        return {
-          'success': true,
-          ...result,
-        };
+        return {'success': true, ...result};
       }
 
       return {
@@ -679,17 +703,26 @@ Respond with valid JSON only:
   /// Parse style analysis from response text
   Map<String, dynamic> _parseStyleAnalysis(String text) {
     int? confidenceRating;
-    final ratingMatch = RegExp(r'(\d+)/10|rating[:\s]+(\d+)', caseSensitive: false).firstMatch(text);
+    final ratingMatch = RegExp(
+      r'(\d+)/10|rating[:\s]+(\d+)',
+      caseSensitive: false,
+    ).firstMatch(text);
     if (ratingMatch != null) {
-      confidenceRating = int.tryParse(ratingMatch.group(1) ?? ratingMatch.group(2) ?? '');
+      confidenceRating = int.tryParse(
+        ratingMatch.group(1) ?? ratingMatch.group(2) ?? '',
+      );
     }
 
     return {
       'confidenceRating': confidenceRating ?? 8,
-      'hasVisualization': text.toLowerCase().contains('visualization') || text.toLowerCase().contains('would look'),
+      'hasVisualization':
+          text.toLowerCase().contains('visualization') ||
+          text.toLowerCase().contains('would look'),
       'hasFitAssessment': text.toLowerCase().contains('fit'),
       'hasColorAnalysis': text.toLowerCase().contains('color'),
-      'hasStylingTips': text.toLowerCase().contains('tip') || text.toLowerCase().contains('suggestion'),
+      'hasStylingTips':
+          text.toLowerCase().contains('tip') ||
+          text.toLowerCase().contains('suggestion'),
     };
   }
 
@@ -723,17 +756,33 @@ Respond with valid JSON only:
         {
           'title': 'Add Items First',
           'items': ['Please add clothing items to your wardrobe'],
-          'tip': 'Upload photos of your clothes to get personalized recommendations.',
-        }
+          'tip':
+              'Upload photos of your clothes to get personalized recommendations.',
+        },
       ];
     }
 
     // Group items by category for smarter fallback
-    final tops = items.where((i) => i['category'] == 'Tops').map((i) => i['name'] as String).toList();
-    final bottoms = items.where((i) => i['category'] == 'Bottoms').map((i) => i['name'] as String).toList();
-    final shoes = items.where((i) => i['category'] == 'Shoes').map((i) => i['name'] as String).toList();
-    final outerwear = items.where((i) => i['category'] == 'Outerwear').map((i) => i['name'] as String).toList();
-    final accessories = items.where((i) => i['category'] == 'Accessories').map((i) => i['name'] as String).toList();
+    final tops = items
+        .where((i) => i['category'] == 'Tops')
+        .map((i) => i['name'] as String)
+        .toList();
+    final bottoms = items
+        .where((i) => i['category'] == 'Bottoms')
+        .map((i) => i['name'] as String)
+        .toList();
+    final shoes = items
+        .where((i) => i['category'] == 'Shoes')
+        .map((i) => i['name'] as String)
+        .toList();
+    final outerwear = items
+        .where((i) => i['category'] == 'Outerwear')
+        .map((i) => i['name'] as String)
+        .toList();
+    final accessories = items
+        .where((i) => i['category'] == 'Accessories')
+        .map((i) => i['name'] as String)
+        .toList();
 
     List<Map<String, dynamic>> outfits = [];
 
@@ -741,11 +790,7 @@ Respond with valid JSON only:
     if (tops.isNotEmpty && bottoms.isNotEmpty) {
       outfits.add({
         'title': 'Classic $occasion Look',
-        'items': [
-          tops.first,
-          bottoms.first,
-          if (shoes.isNotEmpty) shoes.first,
-        ],
+        'items': [tops.first, bottoms.first, if (shoes.isNotEmpty) shoes.first],
         'tip': 'A timeless combination that works for any $occasion setting.',
       });
     }
@@ -755,7 +800,11 @@ Respond with valid JSON only:
         'title': 'Modern $occasion Style',
         'items': [
           tops.length > 1 ? tops[1] : tops.firstOrNull ?? itemNames.first,
-          bottoms.length > 1 ? bottoms[1] : bottoms.firstOrNull ?? itemNames.skip(1).firstOrNull ?? itemNames.first,
+          bottoms.length > 1
+              ? bottoms[1]
+              : bottoms.firstOrNull ??
+                    itemNames.skip(1).firstOrNull ??
+                    itemNames.first,
           if (accessories.isNotEmpty) accessories.first,
         ],
         'tip': 'Add a statement accessory to elevate this look.',
