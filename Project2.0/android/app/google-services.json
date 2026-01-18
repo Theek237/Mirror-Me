@@ -1,0 +1,29 @@
+{
+  "project_info": {
+    "project_number": "1047877466721",
+    "project_id": "mirrorme-33759",
+    "storage_bucket": "mirrorme-33759.firebasestorage.app"
+  },
+  "client": [
+    {
+      "client_info": {
+        "mobilesdk_app_id": "1:1047877466721:android:0872fc9b4bddedbe69c820",
+        "android_client_info": {
+          "package_name": "com.example.mirror_me"
+        }
+      },
+      "oauth_client": [],
+      "api_key": [
+        {
+          "current_key": "AIzaSyA68XoJ7zt4_EkPKkAn1Ix259BMCqmoLWY"
+        }
+      ],
+      "services": {
+        "appinvite_service": {
+          "other_platform_oauth_client": []
+        }
+      }
+    }
+  ],
+  "configuration_version": "1"
+}
