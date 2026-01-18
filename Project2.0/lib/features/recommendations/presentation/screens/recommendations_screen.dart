@@ -2,6 +2,7 @@ import 'package:firebase_auth/firebase_auth.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_animate/flutter_animate.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
+import 'package:image_picker/image_picker.dart';
 import 'package:share_plus/share_plus.dart';
 
 import 'package:mirror_me/core/di/injection.dart';
@@ -24,6 +25,7 @@ class _RecommendationsScreenState extends State<RecommendationsScreen>
     with TickerProviderStateMixin {
   final _auth = sl<FirebaseAuth>();
   late AnimationController _pulseController;
+  final ImagePicker _picker = ImagePicker();
 
   @override
   void initState() {
@@ -64,8 +66,8 @@ class _RecommendationsScreenState extends State<RecommendationsScreen>
             ),
           );
           context.read<RecommendationsBloc>().add(
-            const RecommendationsMessageCleared(),
-          );
+                const RecommendationsMessageCleared(),
+              );
         },
         builder: (context, state) {
           final hasRecommendations = state.recommendations.isNotEmpty;
@@ -82,29 +84,27 @@ class _RecommendationsScreenState extends State<RecommendationsScreen>
                         .animate()
                         .fadeIn(duration: 400.ms)
                         .slideY(begin: -0.2, end: 0),
-
                     const SizedBox(height: 24),
-
                     _buildOccasionSelector().animate().fadeIn(
-                      delay: 200.ms,
-                      duration: 400.ms,
-                    ),
-
+                          delay: 200.ms,
+                          duration: 400.ms,
+                        ),
                     const SizedBox(height: 24),
-
+                    _buildImageUploadSection().animate().fadeIn(
+                          delay: 250.ms,
+                          duration: 400.ms,
+                        ),
+                    const SizedBox(height: 24),
                     _buildGenerateButton(
                       user.uid,
                     ).animate().fadeIn(delay: 300.ms, duration: 400.ms),
-
                     const SizedBox(height: 24),
-
                     if (hasRecommendations) ...[
                       _buildRecommendations(
                         user.uid,
                       ).animate().fadeIn(delay: 400.ms, duration: 500.ms),
                       const SizedBox(height: 24),
                     ],
-
                     _buildFavorites(
                       user.uid,
                     ).animate().fadeIn(delay: 500.ms, duration: 400.ms),
@@ -199,8 +199,8 @@ class _RecommendationsScreenState extends State<RecommendationsScreen>
                 final isSelected = state.selectedOccasion == occasion.name;
                 return GestureDetector(
                   onTap: () => context.read<RecommendationsBloc>().add(
-                    OccasionSelected(occasion: occasion.name),
-                  ),
+                        OccasionSelected(occasion: occasion.name),
+                      ),
                   child: AnimatedContainer(
                     duration: const Duration(milliseconds: 300),
                     padding: const EdgeInsets.symmetric(
@@ -213,9 +213,8 @@ class _RecommendationsScreenState extends State<RecommendationsScreen>
                           : AppTheme.surfaceLight,
                       borderRadius: BorderRadius.circular(12),
                       border: Border.all(
-                        color: isSelected
-                            ? occasion.color
-                            : AppTheme.glassBorder,
+                        color:
+                            isSelected ? occasion.color : AppTheme.glassBorder,
                         width: isSelected ? 2 : 1,
                       ),
                       boxShadow: isSelected
@@ -227,9 +226,8 @@ class _RecommendationsScreenState extends State<RecommendationsScreen>
                       children: [
                         Icon(
                           occasion.icon,
-                          color: isSelected
-                              ? occasion.color
-                              : AppTheme.textMuted,
+                          color:
+                              isSelected ? occasion.color : AppTheme.textMuted,
                           size: 20,
                         ),
                         const SizedBox(width: 8),
@@ -267,8 +265,8 @@ class _RecommendationsScreenState extends State<RecommendationsScreen>
             onPressed: isGenerating
                 ? null
                 : () => context.read<RecommendationsBloc>().add(
-                    GenerateRequested(uid: uid),
-                  ),
+                      GenerateRequested(uid: uid),
+                    ),
           ),
         );
       },
@@ -378,8 +376,8 @@ class _RecommendationsScreenState extends State<RecommendationsScreen>
               Expanded(
                 child: GestureDetector(
                   onTap: () => context.read<RecommendationsBloc>().add(
-                    FavoriteSaved(uid: uid, recommendation: rec),
-                  ),
+                        FavoriteSaved(uid: uid, recommendation: rec),
+                      ),
                   child: Container(
                     padding: const EdgeInsets.symmetric(vertical: 12),
                     decoration: BoxDecoration(
@@ -443,9 +441,9 @@ class _RecommendationsScreenState extends State<RecommendationsScreen>
     );
 
     return card.animate().fadeIn(
-      delay: Duration(milliseconds: 100 * index),
-      duration: 400.ms,
-    );
+          delay: Duration(milliseconds: 100 * index),
+          duration: 400.ms,
+        );
   }
 
   Widget _buildFavorites(String uid) {
@@ -523,14 +521,127 @@ class _RecommendationsScreenState extends State<RecommendationsScreen>
             ),
             IconButton(
               onPressed: () => context.read<RecommendationsBloc>().add(
-                FavoriteDeleted(uid: uid, favoriteId: favorite.id),
-              ),
+                    FavoriteDeleted(uid: uid, favoriteId: favorite.id),
+                  ),
               icon: const Icon(Icons.delete_outline, color: AppTheme.error),
             ),
           ],
         ),
       ),
     );
+  }
+
+  Widget _buildImageUploadSection() {
+    return Column(
+      crossAxisAlignment: CrossAxisAlignment.start,
+      children: [
+        const SectionHeader(
+          title: 'UPLOAD REFERENCE',
+          subtitle: 'Add inspiration images (optional)',
+          icon: Icons.photo_camera,
+        ),
+        const SizedBox(height: 16),
+        Row(
+          children: [
+            Expanded(
+              child: GestureDetector(
+                onTap: () => _pickImage(ImageSource.camera),
+                child: Container(
+                  padding: const EdgeInsets.all(16),
+                  decoration: BoxDecoration(
+                    color: AppTheme.surfaceLight,
+                    borderRadius: BorderRadius.circular(12),
+                    border:
+                        Border.all(color: AppTheme.neonCyan.withOpacity(0.3)),
+                    boxShadow: AppTheme.neonGlow(AppTheme.neonCyan, blur: 5),
+                  ),
+                  child: Column(
+                    children: [
+                      Icon(
+                        Icons.camera_alt,
+                        color: AppTheme.neonCyan,
+                        size: 32,
+                      ),
+                      const SizedBox(height: 8),
+                      Text(
+                        'Camera',
+                        style: AppTheme.labelLarge.copyWith(
+                          color: AppTheme.neonCyan,
+                        ),
+                      ),
+                    ],
+                  ),
+                ),
+              ),
+            ),
+            const SizedBox(width: 12),
+            Expanded(
+              child: GestureDetector(
+                onTap: () => _pickImage(ImageSource.gallery),
+                child: Container(
+                  padding: const EdgeInsets.all(16),
+                  decoration: BoxDecoration(
+                    color: AppTheme.surfaceLight,
+                    borderRadius: BorderRadius.circular(12),
+                    border:
+                        Border.all(color: AppTheme.neonBlue.withOpacity(0.3)),
+                    boxShadow: AppTheme.neonGlow(AppTheme.neonBlue, blur: 5),
+                  ),
+                  child: Column(
+                    children: [
+                      Icon(
+                        Icons.photo_library,
+                        color: AppTheme.neonBlue,
+                        size: 32,
+                      ),
+                      const SizedBox(height: 8),
+                      Text(
+                        'Gallery',
+                        style: AppTheme.labelLarge.copyWith(
+                          color: AppTheme.neonBlue,
+                        ),
+                      ),
+                    ],
+                  ),
+                ),
+              ),
+            ),
+          ],
+        ),
+      ],
+    );
+  }
+
+  Future<void> _pickImage(ImageSource source) async {
+    try {
+      final XFile? image = await _picker.pickImage(
+        source: source,
+        imageQuality: 85,
+        maxWidth: 1920,
+        maxHeight: 1920,
+      );
+
+      if (image != null) {
+        if (!mounted) return;
+        ScaffoldMessenger.of(context).showSnackBar(
+          SnackBar(
+            content: Text('Image selected: ${image.name}'),
+            backgroundColor: AppTheme.success,
+            duration: const Duration(seconds: 2),
+          ),
+        );
+        // TODO: Add the image to the recommendation generation context
+        debugPrint('Selected image: ${image.path}');
+      }
+    } catch (e) {
+      if (!mounted) return;
+      ScaffoldMessenger.of(context).showSnackBar(
+        SnackBar(
+          content: Text('Failed to pick image: $e'),
+          backgroundColor: AppTheme.error,
+        ),
+      );
+    }
   }
 
   void _shareRecommendation(Recommendation rec) {

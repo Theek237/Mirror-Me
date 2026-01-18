@@ -19,8 +19,8 @@ class AppConfig {
     if (geminiApiKey.isNotEmpty) {
       return geminiApiKey;
     }
-    // For development, provide the key via --dart-define or environment.
-    return '';
+    // Development fallback - TODO: Remove before production
+    return 'AIzaSyDDZspZHezsmv19Wdq_IIcU3_vgFnl4inY';
   }
 
   // ═══════════════════════════════════════════════════════════════════════════
