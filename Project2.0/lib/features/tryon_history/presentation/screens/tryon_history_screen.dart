@@ -2,10 +2,10 @@ import 'package:firebase_auth/firebase_auth.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
 
-import '../../core/di/injection.dart';
-import '../../features/tryon_history/presentation/bloc/tryon_history_bloc.dart';
-import '../../features/tryon_history/presentation/bloc/tryon_history_event.dart';
-import '../../features/tryon_history/presentation/bloc/tryon_history_state.dart';
+import 'package:mirror_me/core/di/injection.dart';
+import 'package:mirror_me/features/tryon_history/presentation/bloc/tryon_history_bloc.dart';
+import 'package:mirror_me/features/tryon_history/presentation/bloc/tryon_history_event.dart';
+import 'package:mirror_me/features/tryon_history/presentation/bloc/tryon_history_state.dart';
 
 class TryOnHistoryScreen extends StatelessWidget {
   const TryOnHistoryScreen({super.key});

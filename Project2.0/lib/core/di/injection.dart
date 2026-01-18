@@ -74,7 +74,7 @@ import '../../features/tryon_history/data/repositories/tryon_history_repository_
 import '../../features/tryon_history/domain/repositories/tryon_history_repository.dart';
 import '../../features/tryon_history/domain/usecases/watch_tryon_history.dart';
 import '../../features/tryon_history/presentation/bloc/tryon_history_bloc.dart';
-import '../../services/gemini_service.dart';
+import '../services/gemini_service.dart';
 
 final sl = GetIt.instance;
 

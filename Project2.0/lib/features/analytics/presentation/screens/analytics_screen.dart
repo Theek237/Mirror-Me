@@ -2,10 +2,10 @@ import 'package:firebase_auth/firebase_auth.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
 
-import '../../core/di/injection.dart';
-import '../../features/analytics/presentation/bloc/analytics_bloc.dart';
-import '../../features/analytics/presentation/bloc/analytics_event.dart';
-import '../../features/analytics/presentation/bloc/analytics_state.dart';
+import 'package:mirror_me/core/di/injection.dart';
+import 'package:mirror_me/features/analytics/presentation/bloc/analytics_bloc.dart';
+import 'package:mirror_me/features/analytics/presentation/bloc/analytics_event.dart';
+import 'package:mirror_me/features/analytics/presentation/bloc/analytics_state.dart';
 
 class ClosetAnalyticsScreen extends StatelessWidget {
   const ClosetAnalyticsScreen({super.key});

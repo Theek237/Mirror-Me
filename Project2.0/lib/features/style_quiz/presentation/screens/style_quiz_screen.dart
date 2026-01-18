@@ -2,10 +2,10 @@ import 'package:firebase_auth/firebase_auth.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
 
-import '../../core/di/injection.dart';
-import '../../features/style_quiz/presentation/bloc/style_quiz_bloc.dart';
-import '../../features/style_quiz/presentation/bloc/style_quiz_event.dart';
-import '../../features/style_quiz/presentation/bloc/style_quiz_state.dart';
+import 'package:mirror_me/core/di/injection.dart';
+import 'package:mirror_me/features/style_quiz/presentation/bloc/style_quiz_bloc.dart';
+import 'package:mirror_me/features/style_quiz/presentation/bloc/style_quiz_event.dart';
+import 'package:mirror_me/features/style_quiz/presentation/bloc/style_quiz_state.dart';
 
 class StyleQuizScreen extends StatefulWidget {
   const StyleQuizScreen({super.key});

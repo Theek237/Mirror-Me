@@ -3,10 +3,10 @@ import 'package:flutter/material.dart';
 import 'package:share_plus/share_plus.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
 
-import '../../core/di/injection.dart';
-import '../../features/share_cards/presentation/bloc/share_cards_bloc.dart';
-import '../../features/share_cards/presentation/bloc/share_cards_event.dart';
-import '../../features/share_cards/presentation/bloc/share_cards_state.dart';
+import 'package:mirror_me/core/di/injection.dart';
+import 'package:mirror_me/features/share_cards/presentation/bloc/share_cards_bloc.dart';
+import 'package:mirror_me/features/share_cards/presentation/bloc/share_cards_event.dart';
+import 'package:mirror_me/features/share_cards/presentation/bloc/share_cards_state.dart';
 
 class ShareCardsScreen extends StatelessWidget {
   const ShareCardsScreen({super.key});

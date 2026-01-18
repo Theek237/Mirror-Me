@@ -1,11 +1,11 @@
 import 'package:flutter/material.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
 
-import '../../core/di/injection.dart';
-import '../../features/auth/presentation/bloc/auth_session_cubit.dart';
-import '../home_screen.dart';
-import '../splash_screen.dart';
-import 'login_screen.dart';
+import 'package:mirror_me/core/di/injection.dart';
+import 'package:mirror_me/core/presentation/screens/home_screen.dart';
+import 'package:mirror_me/core/presentation/screens/splash_screen.dart';
+import 'package:mirror_me/features/auth/presentation/bloc/auth_session_cubit.dart';
+import 'package:mirror_me/features/auth/presentation/screens/login_screen.dart';
 
 class AuthGate extends StatefulWidget {
   const AuthGate({super.key});

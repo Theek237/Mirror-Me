@@ -4,14 +4,14 @@ import 'package:flutter_animate/flutter_animate.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
 import 'package:share_plus/share_plus.dart';
 
-import '../core/di/injection.dart';
-import '../features/recommendations/domain/entities/favorite_recommendation.dart';
-import '../features/recommendations/domain/entities/recommendation.dart';
-import '../features/recommendations/presentation/bloc/recommendations_bloc.dart';
-import '../features/recommendations/presentation/bloc/recommendations_event.dart';
-import '../features/recommendations/presentation/bloc/recommendations_state.dart';
-import '../theme/app_theme.dart';
-import '../widgets/cyber_widgets.dart';
+import 'package:mirror_me/core/di/injection.dart';
+import 'package:mirror_me/features/recommendations/domain/entities/favorite_recommendation.dart';
+import 'package:mirror_me/features/recommendations/domain/entities/recommendation.dart';
+import 'package:mirror_me/features/recommendations/presentation/bloc/recommendations_bloc.dart';
+import 'package:mirror_me/features/recommendations/presentation/bloc/recommendations_event.dart';
+import 'package:mirror_me/features/recommendations/presentation/bloc/recommendations_state.dart';
+import 'package:mirror_me/theme/app_theme.dart';
+import 'package:mirror_me/widgets/cyber_widgets.dart';
 
 class RecommendationsScreen extends StatefulWidget {
   const RecommendationsScreen({super.key});

@@ -7,14 +7,14 @@ import 'package:flutter_bloc/flutter_bloc.dart';
 import 'package:flutter_staggered_animations/flutter_staggered_animations.dart';
 import 'package:image_picker/image_picker.dart';
 
-import '../core/di/injection.dart';
-import '../features/wardrobe/domain/entities/wardrobe_item.dart';
-import '../features/wardrobe/presentation/bloc/wardrobe_bloc.dart';
-import '../features/wardrobe/presentation/bloc/wardrobe_event.dart';
-import '../features/wardrobe/presentation/bloc/wardrobe_state.dart';
-import '../services/image_storage_service.dart';
-import '../theme/app_theme.dart';
-import '../widgets/cyber_widgets.dart';
+import 'package:mirror_me/core/di/injection.dart';
+import 'package:mirror_me/core/services/image_storage_service.dart';
+import 'package:mirror_me/features/wardrobe/domain/entities/wardrobe_item.dart';
+import 'package:mirror_me/features/wardrobe/presentation/bloc/wardrobe_bloc.dart';
+import 'package:mirror_me/features/wardrobe/presentation/bloc/wardrobe_event.dart';
+import 'package:mirror_me/features/wardrobe/presentation/bloc/wardrobe_state.dart';
+import 'package:mirror_me/theme/app_theme.dart';
+import 'package:mirror_me/widgets/cyber_widgets.dart';
 
 class WardrobeScreen extends StatefulWidget {
   const WardrobeScreen({super.key});
