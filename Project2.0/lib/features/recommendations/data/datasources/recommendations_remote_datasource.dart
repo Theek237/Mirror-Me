@@ -1,6 +1,7 @@
 import 'package:cloud_firestore/cloud_firestore.dart';
 
 import '../../../../core/services/gemini_service.dart';
+import '../../../../core/services/local_wardrobe_cache.dart';
 import '../models/favorite_recommendation_model.dart';
 import '../models/recommendation_model.dart';
 
@@ -18,30 +19,42 @@ class RecommendationsRemoteDataSource {
         .orderBy('createdAt', descending: true)
         .snapshots()
         .map((snapshot) {
-          return snapshot.docs
-              .map(
-                (doc) =>
-                    FavoriteRecommendationModel.fromMap(doc.id, doc.data()),
-              )
-              .toList();
-        });
+      return snapshot.docs
+          .map(
+            (doc) => FavoriteRecommendationModel.fromMap(doc.id, doc.data()),
+          )
+          .toList();
+    });
   }
 
   Future<List<Map<String, dynamic>>> fetchWardrobeItems(String uid) async {
-    final wardrobeSnapshot = await _firestore
-        .collection('users')
-        .doc(uid)
-        .collection('wardrobe')
-        .get();
+    try {
+      final wardrobeSnapshot = await _firestore
+          .collection('users')
+          .doc(uid)
+          .collection('wardrobe')
+          .get();
 
-    return wardrobeSnapshot.docs.map((doc) {
-      final data = doc.data();
-      return {
-        'name': data['name'],
-        'category': data['category'],
-        'color': data['color'],
-      };
-    }).toList();
+      return wardrobeSnapshot.docs.map((doc) {
+        final data = doc.data();
+        return {
+          'name': data['name'],
+          'category': data['category'],
+          'color': data['color'],
+        };
+      }).toList();
+    } catch (_) {
+      final cached = await LocalWardrobeCache.load(uid);
+      return cached
+          .map(
+            (item) => {
+              'name': item.name,
+              'category': item.category,
+              'color': item.color,
+            },
+          )
+          .toList();
+    }
   }
 
   Future<List<RecommendationModel>> generateRecommendations({
@@ -68,10 +81,10 @@ class RecommendationsRemoteDataSource {
         .doc(uid)
         .collection('recommendations')
         .add({
-          'occasion': occasion,
-          'outfits': recommendations.map((rec) => rec.toMap()).toList(),
-          'createdAt': DateTime.now().toIso8601String(),
-        });
+      'occasion': occasion,
+      'outfits': recommendations.map((rec) => rec.toMap()).toList(),
+      'createdAt': DateTime.now().toIso8601String(),
+    });
   }
 
   Future<void> saveFavorite({

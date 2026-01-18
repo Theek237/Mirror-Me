@@ -1,3 +1,5 @@
+import 'dart:io';
+
 import 'package:cached_network_image/cached_network_image.dart';
 import 'package:cloud_firestore/cloud_firestore.dart';
 import 'package:firebase_auth/firebase_auth.dart';
@@ -9,6 +11,7 @@ import 'package:image_picker/image_picker.dart';
 
 import 'package:mirror_me/core/di/injection.dart';
 import 'package:mirror_me/core/services/image_storage_service.dart';
+import 'package:mirror_me/core/services/local_wardrobe_cache.dart';
 import 'package:mirror_me/features/wardrobe/domain/entities/wardrobe_item.dart';
 import 'package:mirror_me/features/wardrobe/presentation/bloc/wardrobe_bloc.dart';
 import 'package:mirror_me/features/wardrobe/presentation/bloc/wardrobe_event.dart';
@@ -125,8 +128,8 @@ class _WardrobeScreenState extends State<WardrobeScreen> {
                   selectedColor: AppTheme.neonCyan,
                   onTap: () {
                     context.read<WardrobeBloc>().add(
-                      WardrobeCategorySelected(category: category),
-                    );
+                          WardrobeCategorySelected(category: category),
+                        );
                   },
                 ),
               );
@@ -225,18 +228,25 @@ class _WardrobeScreenState extends State<WardrobeScreen> {
                             ),
                           ),
                         )
-                      : CachedNetworkImage(
-                          imageUrl: item.imageUrl!,
-                          fit: BoxFit.cover,
-                          placeholder: (context, url) => Container(
-                            color: AppTheme.surfaceLight,
-                            child: const Center(child: CyberLoader(size: 30)),
-                          ),
-                          errorWidget: (context, url, error) => Container(
-                            color: AppTheme.surfaceLight,
-                            child: const Icon(Icons.error_outline),
-                          ),
-                        ),
+                      : item.imageUrl!.startsWith('file://')
+                          ? Image.file(
+                              File(Uri.parse(item.imageUrl!).toFilePath()),
+                              fit: BoxFit.cover,
+                            )
+                          : CachedNetworkImage(
+                              imageUrl: item.imageUrl!,
+                              fit: BoxFit.cover,
+                              placeholder: (context, url) => Container(
+                                color: AppTheme.surfaceLight,
+                                child: const Center(
+                                  child: CyberLoader(size: 30),
+                                ),
+                              ),
+                              errorWidget: (context, url, error) => Container(
+                                color: AppTheme.surfaceLight,
+                                child: const Icon(Icons.error_outline),
+                              ),
+                            ),
                   // Category badge
                   Positioned(
                     top: 8,
@@ -306,23 +316,21 @@ class _WardrobeScreenState extends State<WardrobeScreen> {
 
   Widget _buildAddButton(String uid) {
     return GestureDetector(
-          onTap: () => _showAddItemDialog(context, uid),
-          child: Container(
-            padding: const EdgeInsets.all(16),
-            decoration: BoxDecoration(
-              gradient: AppTheme.primaryGradient,
-              borderRadius: BorderRadius.circular(16),
-              boxShadow: AppTheme.neonGlow(AppTheme.neonCyan, blur: 20),
-            ),
-            child: const Icon(
-              Icons.add,
-              color: AppTheme.backgroundDark,
-              size: 28,
-            ),
-          ),
-        )
-        .animate(onPlay: (c) => c.repeat(reverse: true))
-        .scale(
+      onTap: () => _showAddItemDialog(context, uid),
+      child: Container(
+        padding: const EdgeInsets.all(16),
+        decoration: BoxDecoration(
+          gradient: AppTheme.primaryGradient,
+          borderRadius: BorderRadius.circular(16),
+          boxShadow: AppTheme.neonGlow(AppTheme.neonCyan, blur: 20),
+        ),
+        child: const Icon(
+          Icons.add,
+          color: AppTheme.backgroundDark,
+          size: 28,
+        ),
+      ),
+    ).animate(onPlay: (c) => c.repeat(reverse: true)).scale(
           begin: const Offset(1, 1),
           end: const Offset(1.05, 1.05),
           duration: const Duration(seconds: 2),
@@ -436,20 +444,19 @@ class _WardrobeScreenState extends State<WardrobeScreen> {
                       labelText: 'Category',
                       prefixIcon: Icon(Icons.category_outlined),
                     ),
-                    items:
-                        const [
-                          'Tops',
-                          'Bottoms',
-                          'Dresses',
-                          'Shoes',
-                          'Outerwear',
-                          'Accessories',
-                        ].map((value) {
-                          return DropdownMenuItem(
-                            value: value,
-                            child: Text(value),
-                          );
-                        }).toList(),
+                    items: const [
+                      'Tops',
+                      'Bottoms',
+                      'Dresses',
+                      'Shoes',
+                      'Outerwear',
+                      'Accessories',
+                    ].map((value) {
+                      return DropdownMenuItem(
+                        value: value,
+                        child: Text(value),
+                      );
+                    }).toList(),
                     onChanged: (value) =>
                         setState(() => category = value ?? category),
                   ),
@@ -464,20 +471,19 @@ class _WardrobeScreenState extends State<WardrobeScreen> {
                       labelText: 'Color Palette',
                       prefixIcon: Icon(Icons.palette_outlined),
                     ),
-                    items:
-                        const [
-                          'Neutral',
-                          'Warm',
-                          'Cool',
-                          'Bright',
-                          'Pastel',
-                          'Dark',
-                        ].map((value) {
-                          return DropdownMenuItem(
-                            value: value,
-                            child: Text(value),
-                          );
-                        }).toList(),
+                    items: const [
+                      'Neutral',
+                      'Warm',
+                      'Cool',
+                      'Bright',
+                      'Pastel',
+                      'Dark',
+                    ].map((value) {
+                      return DropdownMenuItem(
+                        value: value,
+                        child: Text(value),
+                      );
+                    }).toList(),
                     onChanged: (value) =>
                         setState(() => color = value ?? color),
                   ),
@@ -561,11 +567,8 @@ class _WardrobeScreenState extends State<WardrobeScreen> {
     String color,
     XFile? image,
   ) async {
-    final docRef = _firestore
-        .collection('users')
-        .doc(uid)
-        .collection('wardrobe')
-        .doc();
+    final docRef =
+        _firestore.collection('users').doc(uid).collection('wardrobe').doc();
     String? imageUrl;
 
     if (image != null) {
@@ -576,15 +579,56 @@ class _WardrobeScreenState extends State<WardrobeScreen> {
         fileName: '${docRef.id}.jpg',
         imageFile: image,
       );
+
+      if (imageUrl == null) {
+        imageUrl = 'file://${image.path}';
+        if (mounted) {
+          ScaffoldMessenger.of(context).showSnackBar(
+            SnackBar(
+              content: const Text(
+                'Image upload failed. Showing local image only.',
+              ),
+              backgroundColor: AppTheme.error,
+            ),
+          );
+        }
+      }
     }
 
-    await docRef.set({
-      'name': name,
-      'category': category,
-      'color': color,
-      'imageUrl': imageUrl,
-      'createdAt': DateTime.now().toIso8601String(),
-    });
+    final createdAt = DateTime.now();
+
+    await LocalWardrobeCache.upsert(
+      uid,
+      WardrobeItem(
+        id: docRef.id,
+        name: name,
+        category: category,
+        color: color,
+        createdAt: createdAt,
+        imageUrl: imageUrl,
+      ),
+    );
+
+    try {
+      await docRef.set({
+        'name': name,
+        'category': category,
+        'color': color,
+        'imageUrl': imageUrl,
+        'createdAt': createdAt.toIso8601String(),
+      });
+    } catch (e) {
+      if (mounted) {
+        ScaffoldMessenger.of(context).showSnackBar(
+          SnackBar(
+            content: const Text(
+              'Saved locally. Cloud sync failed (check connection).',
+            ),
+            backgroundColor: AppTheme.error,
+          ),
+        );
+      }
+    }
 
     if (mounted) {
       ScaffoldMessenger.of(context).showSnackBar(

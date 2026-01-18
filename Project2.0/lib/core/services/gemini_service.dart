@@ -1,4 +1,5 @@
 import 'dart:convert';
+import 'dart:io';
 import 'dart:typed_data';
 
 import 'package:flutter/foundation.dart';
@@ -87,8 +88,7 @@ class GeminiService {
       String userDescription = await _analyzeUserForImageGen(userPhoto);
 
       // Create a detailed prompt for virtual try-on
-      final prompt =
-          '''
+      final prompt = '''
 Create a photorealistic fashion photograph of a person wearing $clothingDescription.
 The person should match this description: $userDescription
 Style: Professional fashion photography, full body shot, clean background, natural lighting.
@@ -277,14 +277,11 @@ Keep it to 2-3 sentences, factual and respectful.
     }
 
     try {
-      final itemDescriptions = wardrobeItems
-          .map((item) {
-            return '${item['name']} (${item['category']}, ${item['color']})';
-          })
-          .join(', ');
+      final itemDescriptions = wardrobeItems.map((item) {
+        return '${item['name']} (${item['category']}, ${item['color']})';
+      }).join(', ');
 
-      final prompt =
-          '''
+      final prompt = '''
 You are a professional fashion stylist AI. Based on the following wardrobe items and occasion, create 3 unique, stylish outfit recommendations.
 
 Available Wardrobe Items: $itemDescriptions
@@ -327,14 +324,12 @@ You MUST respond with valid JSON only, no other text:
 
       debugPrint('Sending recommendation request to Gemini...');
       final content = [Content.text(prompt)];
-      final response = await _model!
-          .generateContent(content)
-          .timeout(
-            const Duration(seconds: 30),
-            onTimeout: () {
-              throw Exception('Request timed out');
-            },
-          );
+      final response = await _model!.generateContent(content).timeout(
+        const Duration(seconds: 30),
+        onTimeout: () {
+          throw Exception('Request timed out');
+        },
+      );
 
       if (response.text != null && response.text!.isNotEmpty) {
         debugPrint('Received response from Gemini');
@@ -385,11 +380,16 @@ You MUST respond with valid JSON only, no other text:
       Uint8List? clothingImageBytes;
       if (clothingImageUrl != null && clothingImageUrl.isNotEmpty) {
         try {
-          final response = await http
-              .get(Uri.parse(clothingImageUrl))
-              .timeout(const Duration(seconds: 10));
-          if (response.statusCode == 200) {
-            clothingImageBytes = response.bodyBytes;
+          if (clothingImageUrl.startsWith('file://')) {
+            final file = File(Uri.parse(clothingImageUrl).toFilePath());
+            clothingImageBytes = await file.readAsBytes();
+          } else {
+            final response = await http
+                .get(Uri.parse(clothingImageUrl))
+                .timeout(const Duration(seconds: 10));
+            if (response.statusCode == 200) {
+              clothingImageBytes = response.bodyBytes;
+            }
           }
         } catch (e) {
           debugPrint('Failed to fetch clothing image: $e');
@@ -405,8 +405,7 @@ You MUST respond with valid JSON only, no other text:
       );
 
       // Now generate the text analysis
-      final prompt =
-          '''
+      final prompt = '''
 You are an expert fashion stylist and virtual try-on assistant. Analyze this photo of a person and provide a detailed virtual try-on assessment for: $clothingDescription
 
 Please provide a comprehensive analysis including:
@@ -493,14 +492,11 @@ Be encouraging, specific, and provide actionable fashion advice!
     }
 
     try {
-      final itemsDescription = selectedItems
-          .map((item) {
-            return '${item['name']} (${item['category']}, ${item['color']})';
-          })
-          .join(', ');
+      final itemsDescription = selectedItems.map((item) {
+        return '${item['name']} (${item['category']}, ${item['color']})';
+      }).join(', ');
 
-      final prompt =
-          '''
+      final prompt = '''
 You are an expert fashion stylist. Analyze this photo and create a detailed visualization of how this person would look wearing the following outfit:
 
 OUTFIT ITEMS: $itemsDescription
@@ -533,8 +529,7 @@ Be detailed, encouraging, and help the person visualize exactly how amazing they
 
       return {
         'success': true,
-        'description':
-            response.text ??
+        'description': response.text ??
             'This outfit combination would look fantastic on you!',
         'items': selectedItems.map((i) => i['name']).toList(),
         'status': 'completed',
@@ -558,14 +553,11 @@ Be detailed, encouraging, and help the person visualize exactly how amazing they
     }
 
     try {
-      final itemDescriptions = wardrobeItems
-          .map((item) {
-            return '${item['name']} (${item['category']}, ${item['color']})';
-          })
-          .join('\n');
+      final itemDescriptions = wardrobeItems.map((item) {
+        return '${item['name']} (${item['category']}, ${item['color']})';
+      }).join('\n');
 
-      final prompt =
-          '''
+      final prompt = '''
 Analyze this wardrobe and provide fashion insights:
 
 Wardrobe Items:
@@ -607,8 +599,7 @@ Respond with valid JSON only:
     }
 
     try {
-      final prompt =
-          '''
+      final prompt = '''
 Based on these style quiz answers, determine the person's fashion personality:
 
 ${answers.entries.map((e) => '${e.key}: ${e.value}').join('\n')}
@@ -715,13 +706,11 @@ Respond with valid JSON only:
 
     return {
       'confidenceRating': confidenceRating ?? 8,
-      'hasVisualization':
-          text.toLowerCase().contains('visualization') ||
+      'hasVisualization': text.toLowerCase().contains('visualization') ||
           text.toLowerCase().contains('would look'),
       'hasFitAssessment': text.toLowerCase().contains('fit'),
       'hasColorAnalysis': text.toLowerCase().contains('color'),
-      'hasStylingTips':
-          text.toLowerCase().contains('tip') ||
+      'hasStylingTips': text.toLowerCase().contains('tip') ||
           text.toLowerCase().contains('suggestion'),
     };
   }
@@ -803,8 +792,8 @@ Respond with valid JSON only:
           bottoms.length > 1
               ? bottoms[1]
               : bottoms.firstOrNull ??
-                    itemNames.skip(1).firstOrNull ??
-                    itemNames.first,
+                  itemNames.skip(1).firstOrNull ??
+                  itemNames.first,
           if (accessories.isNotEmpty) accessories.first,
         ],
         'tip': 'Add a statement accessory to elevate this look.',
