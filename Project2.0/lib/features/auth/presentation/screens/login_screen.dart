@@ -2,12 +2,12 @@ import 'package:flutter/material.dart';
 import 'package:flutter_animate/flutter_animate.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
 
-import '../../core/di/injection.dart';
-import '../../features/auth/presentation/bloc/auth_bloc.dart';
-import '../../features/auth/presentation/bloc/auth_event.dart';
-import '../../features/auth/presentation/bloc/auth_state.dart';
-import '../../theme/app_theme.dart';
-import '../../widgets/app_logo.dart';
+import 'package:mirror_me/core/di/injection.dart';
+import 'package:mirror_me/features/auth/presentation/bloc/auth_bloc.dart';
+import 'package:mirror_me/features/auth/presentation/bloc/auth_event.dart';
+import 'package:mirror_me/features/auth/presentation/bloc/auth_state.dart';
+import 'package:mirror_me/theme/app_theme.dart';
+import 'package:mirror_me/widgets/app_logo.dart';
 import 'forgot_password_screen.dart';
 import 'signup_screen.dart';
 

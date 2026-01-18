@@ -3,8 +3,8 @@ import 'dart:typed_data';
 import 'package:cloud_firestore/cloud_firestore.dart';
 import 'package:flutter/foundation.dart';
 
-import '../../../../services/gemini_service.dart';
-import '../../../../services/image_storage_service.dart';
+import '../../../../core/services/gemini_service.dart';
+import '../../../../core/services/image_storage_service.dart';
 
 class TryOnRemoteDataSource {
   TryOnRemoteDataSource(this._firestore, this._geminiService);
@@ -70,9 +70,6 @@ class TryOnRemoteDataSource {
     });
 
     // Return result with generated image URL
-    return {
-      ...result,
-      'generatedImageUrl': generatedImageUrl,
-    };
+    return {...result, 'generatedImageUrl': generatedImageUrl};
   }
 }

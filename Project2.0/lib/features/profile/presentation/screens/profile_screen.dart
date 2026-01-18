@@ -2,23 +2,22 @@ import 'package:firebase_auth/firebase_auth.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_animate/flutter_animate.dart';
 
-import 'features/analytics_screen.dart';
-import 'features/calendar_screen.dart';
-import 'features/collections_screen.dart';
-import 'features/share_cards_screen.dart';
-import 'features/style_quiz_screen.dart';
-import 'features/tryon_history_screen.dart';
-
-import '../core/di/injection.dart';
-import '../features/auth/domain/usecases/sign_out.dart';
-import '../features/profile/domain/entities/user_profile.dart';
-import '../features/profile/domain/usecases/watch_favorites_count.dart';
-import '../features/profile/domain/usecases/watch_recommendations_count.dart';
-import '../features/profile/domain/usecases/watch_tryon_count.dart';
-import '../features/profile/domain/usecases/watch_user_profile.dart';
-import '../features/profile/domain/usecases/watch_wardrobe_count.dart';
-import '../theme/app_theme.dart';
-import '../widgets/cyber_widgets.dart';
+import 'package:mirror_me/core/di/injection.dart';
+import 'package:mirror_me/features/analytics/presentation/screens/analytics_screen.dart';
+import 'package:mirror_me/features/auth/domain/usecases/sign_out.dart';
+import 'package:mirror_me/features/calendar/presentation/screens/calendar_screen.dart';
+import 'package:mirror_me/features/collections/presentation/screens/collections_screen.dart';
+import 'package:mirror_me/features/profile/domain/entities/user_profile.dart';
+import 'package:mirror_me/features/profile/domain/usecases/watch_favorites_count.dart';
+import 'package:mirror_me/features/profile/domain/usecases/watch_recommendations_count.dart';
+import 'package:mirror_me/features/profile/domain/usecases/watch_tryon_count.dart';
+import 'package:mirror_me/features/profile/domain/usecases/watch_user_profile.dart';
+import 'package:mirror_me/features/profile/domain/usecases/watch_wardrobe_count.dart';
+import 'package:mirror_me/features/share_cards/presentation/screens/share_cards_screen.dart';
+import 'package:mirror_me/features/style_quiz/presentation/screens/style_quiz_screen.dart';
+import 'package:mirror_me/features/tryon_history/presentation/screens/tryon_history_screen.dart';
+import 'package:mirror_me/theme/app_theme.dart';
+import 'package:mirror_me/widgets/cyber_widgets.dart';
 
 class ProfileScreen extends StatelessWidget {
   const ProfileScreen({super.key});

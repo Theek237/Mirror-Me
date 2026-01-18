@@ -11,14 +11,14 @@ import 'package:flutter_animate/flutter_animate.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
 import 'package:image_picker/image_picker.dart';
 
-import '../core/di/injection.dart';
-import '../features/tryon/presentation/bloc/tryon_bloc.dart';
-import '../features/tryon/presentation/bloc/tryon_event.dart';
-import '../features/tryon/presentation/bloc/tryon_state.dart';
-import '../services/gemini_service.dart';
-import '../theme/app_theme.dart';
-import '../widgets/cyber_widgets.dart';
-import '../features/camera/presentation/camera_screen.dart';
+import 'package:mirror_me/core/di/injection.dart';
+import 'package:mirror_me/core/services/gemini_service.dart';
+import 'package:mirror_me/features/camera/presentation/camera_screen.dart';
+import 'package:mirror_me/features/tryon/presentation/bloc/tryon_bloc.dart';
+import 'package:mirror_me/features/tryon/presentation/bloc/tryon_event.dart';
+import 'package:mirror_me/features/tryon/presentation/bloc/tryon_state.dart';
+import 'package:mirror_me/theme/app_theme.dart';
+import 'package:mirror_me/widgets/cyber_widgets.dart';
 
 class TryOnScreen extends StatefulWidget {
   const TryOnScreen({super.key});
@@ -270,7 +270,7 @@ class _TryOnScreenState extends State<TryOnScreen>
                 ),
                 const SizedBox(height: 4),
                 Text(
-                  'Set your Gemini API key in lib/config/app_config.dart',
+                  'Set your Gemini API key in lib/core/config/app_config.dart',
                   style: AppTheme.bodyMedium,
                 ),
               ],
@@ -668,7 +668,11 @@ class _TryOnScreenState extends State<TryOnScreen>
     );
   }
 
-  Widget _buildGenerateButton(String uid, bool isSubmitting, BuildContext blocContext) {
+  Widget _buildGenerateButton(
+    String uid,
+    bool isSubmitting,
+    BuildContext blocContext,
+  ) {
     final canGenerate = _userPhoto != null && _selectedItemId != null;
 
     return SizedBox(

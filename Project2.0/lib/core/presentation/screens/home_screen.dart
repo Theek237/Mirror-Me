@@ -1,11 +1,11 @@
 import 'package:flutter/gestures.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_animate/flutter_animate.dart';
-import '../theme/app_theme.dart';
-import 'wardrobe_screen.dart';
-import 'tryon_screen.dart';
-import 'recommendations_screen.dart';
-import 'profile_screen.dart';
+import 'package:mirror_me/features/profile/presentation/screens/profile_screen.dart';
+import 'package:mirror_me/features/recommendations/presentation/screens/recommendations_screen.dart';
+import 'package:mirror_me/features/tryon/presentation/screens/tryon_screen.dart';
+import 'package:mirror_me/features/wardrobe/presentation/screens/wardrobe_screen.dart';
+import 'package:mirror_me/theme/app_theme.dart';
 
 class HomeScreen extends StatefulWidget {
   const HomeScreen({super.key});

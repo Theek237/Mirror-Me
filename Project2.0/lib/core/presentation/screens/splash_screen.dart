@@ -1,7 +1,7 @@
 import 'package:flutter/material.dart';
 import 'package:flutter_animate/flutter_animate.dart';
-import '../theme/app_theme.dart';
-import '../widgets/app_logo.dart';
+import 'package:mirror_me/theme/app_theme.dart';
+import 'package:mirror_me/widgets/app_logo.dart';
 
 class SplashScreen extends StatefulWidget {
   final VoidCallback? onComplete;

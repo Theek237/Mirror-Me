@@ -1,9 +1,9 @@
 import 'package:flutter/material.dart';
 import 'package:flutter_animate/flutter_animate.dart';
-import '../theme/app_theme.dart';
-import '../widgets/app_logo.dart';
-import 'auth/login_screen.dart';
-import 'auth/signup_screen.dart';
+import 'package:mirror_me/features/auth/presentation/screens/login_screen.dart';
+import 'package:mirror_me/features/auth/presentation/screens/signup_screen.dart';
+import 'package:mirror_me/theme/app_theme.dart';
+import 'package:mirror_me/widgets/app_logo.dart';
 
 class WelcomeScreen extends StatelessWidget {
   const WelcomeScreen({super.key});
@@ -34,26 +34,35 @@ class WelcomeScreen extends StatelessWidget {
 
               // Features
               _buildFeatureRow(
-                Icons.auto_awesome,
-                'AI Try-On',
-                'See yourself in any outfit',
-              ).animate().fadeIn(delay: 300.ms, duration: 400.ms).slideX(begin: -0.1, end: 0),
+                    Icons.auto_awesome,
+                    'AI Try-On',
+                    'See yourself in any outfit',
+                  )
+                  .animate()
+                  .fadeIn(delay: 300.ms, duration: 400.ms)
+                  .slideX(begin: -0.1, end: 0),
 
               const SizedBox(height: 16),
 
               _buildFeatureRow(
-                Icons.checkroom,
-                'Smart Wardrobe',
-                'Organize your closet digitally',
-              ).animate().fadeIn(delay: 400.ms, duration: 400.ms).slideX(begin: -0.1, end: 0),
+                    Icons.checkroom,
+                    'Smart Wardrobe',
+                    'Organize your closet digitally',
+                  )
+                  .animate()
+                  .fadeIn(delay: 400.ms, duration: 400.ms)
+                  .slideX(begin: -0.1, end: 0),
 
               const SizedBox(height: 16),
 
               _buildFeatureRow(
-                Icons.style,
-                'Style Tips',
-                'Get personalized recommendations',
-              ).animate().fadeIn(delay: 500.ms, duration: 400.ms).slideX(begin: -0.1, end: 0),
+                    Icons.style,
+                    'Style Tips',
+                    'Get personalized recommendations',
+                  )
+                  .animate()
+                  .fadeIn(delay: 500.ms, duration: 400.ms)
+                  .slideX(begin: -0.1, end: 0),
 
               const Spacer(),
 
@@ -93,10 +102,7 @@ class WelcomeScreen extends StatelessWidget {
                       borderRadius: BorderRadius.circular(14),
                     ),
                   ),
-                  child: Text(
-                    'Sign In',
-                    style: AppTheme.labelLarge,
-                  ),
+                  child: Text('Sign In', style: AppTheme.labelLarge),
                 ),
               ).animate().fadeIn(delay: 700.ms, duration: 400.ms),
 
@@ -151,9 +157,6 @@ class WelcomeScreen extends StatelessWidget {
   }
 
   void _navigateTo(BuildContext context, Widget screen) {
-    Navigator.push(
-      context,
-      MaterialPageRoute(builder: (_) => screen),
-    );
+    Navigator.push(context, MaterialPageRoute(builder: (_) => screen));
   }
 }

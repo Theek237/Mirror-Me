@@ -2,10 +2,10 @@ import 'package:firebase_auth/firebase_auth.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
 
-import '../../core/di/injection.dart';
-import '../../features/collections/presentation/bloc/collections_bloc.dart';
-import '../../features/collections/presentation/bloc/collections_event.dart';
-import '../../features/collections/presentation/bloc/collections_state.dart';
+import 'package:mirror_me/core/di/injection.dart';
+import 'package:mirror_me/features/collections/presentation/bloc/collections_bloc.dart';
+import 'package:mirror_me/features/collections/presentation/bloc/collections_event.dart';
+import 'package:mirror_me/features/collections/presentation/bloc/collections_state.dart';
 
 class CollectionsScreen extends StatelessWidget {
   const CollectionsScreen({super.key});

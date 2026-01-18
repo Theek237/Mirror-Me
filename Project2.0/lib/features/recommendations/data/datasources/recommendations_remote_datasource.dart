@@ -1,6 +1,6 @@
 import 'package:cloud_firestore/cloud_firestore.dart';
 
-import '../../../../services/gemini_service.dart';
+import '../../../../core/services/gemini_service.dart';
 import '../models/favorite_recommendation_model.dart';
 import '../models/recommendation_model.dart';
 
