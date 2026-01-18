@@ -86,7 +86,7 @@ class GeminiService {
 
     try {
       debugPrint('🎨 Analyzing user photo for try-on...');
-      
+
       // Analyze the user photo and clothing
       String userDescription = await _analyzeUserForImageGen(userPhoto);
       debugPrint('✓ User analysis: $userDescription');
@@ -105,13 +105,14 @@ High quality, detailed, fashion magazine style.
       // NOTE: Imagen 3 and native image generation are still in preview
       // For now, we return the user's photo as a placeholder
       // In production, integrate with proper Vertex AI Imagen 3 API
-      
+
       debugPrint('⚠️  Image generation API not fully available yet');
       debugPrint('📝 Returning analysis with placeholder');
-      
+
       return {
         'success': true,
-        'generatedImageBytes': userPhoto, // Return original photo as placeholder
+        'generatedImageBytes':
+            userPhoto, // Return original photo as placeholder
         'prompt': prompt,
         'isPlaceholder': true,
         'message': 'AI analysis complete. Full image generation coming soon!',
