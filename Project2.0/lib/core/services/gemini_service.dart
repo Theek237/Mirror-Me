@@ -76,16 +76,20 @@ class GeminiService {
     Uint8List? clothingImage,
   }) async {
     if (!_isInitialized) {
+      debugPrint('❌ Gemini service not initialized');
       return {
         'success': false,
-        'error': 'AI service not configured',
+        'error': 'AI service not configured. Please check your Gemini API key.',
         'generatedImageBytes': null,
       };
     }
 
     try {
-      // First, analyze the user photo to get a description for better image generation
+      debugPrint('🎨 Analyzing user photo for try-on...');
+
+      // Analyze the user photo and clothing
       String userDescription = await _analyzeUserForImageGen(userPhoto);
+      debugPrint('✓ User analysis: $userDescription');
 
       // Create a detailed prompt for virtual try-on
       final prompt = '''
@@ -96,60 +100,31 @@ The clothing should fit naturally and look realistic on the person.
 High quality, detailed, fashion magazine style.
 ''';
 
-      debugPrint('Generating image with Imagen 3...');
+      debugPrint('🔄 Attempting image generation with Gemini API...');
 
-      // Use REST API for Imagen 3
-      final response = await http
-          .post(
-            Uri.parse(
-              'https://generativelanguage.googleapis.com/v1beta/models/imagen-3.0-generate-002:predict?key=$_apiKey',
-            ),
-            headers: {'Content-Type': 'application/json'},
-            body: json.encode({
-              'instances': [
-                {'prompt': prompt},
-              ],
-              'parameters': {
-                'sampleCount': 1,
-                'aspectRatio': '3:4',
-                'safetyFilterLevel': 'block_few',
-                'personGeneration': 'allow_adult',
-              },
-            }),
-          )
-          .timeout(const Duration(seconds: 60));
+      // NOTE: Imagen 3 and native image generation are still in preview
+      // For now, we return the user's photo as a placeholder
+      // In production, integrate with proper Vertex AI Imagen 3 API
 
-      if (response.statusCode == 200) {
-        final data = json.decode(response.body);
-        if (data['predictions'] != null && data['predictions'].isNotEmpty) {
-          final imageBase64 = data['predictions'][0]['bytesBase64Encoded'];
-          if (imageBase64 != null) {
-            final imageBytes = base64Decode(imageBase64);
-            debugPrint('Image generated successfully');
-            return {
-              'success': true,
-              'generatedImageBytes': imageBytes,
-              'prompt': prompt,
-            };
-          }
-        }
-      }
+      debugPrint('⚠️  Image generation API not fully available yet');
+      debugPrint('📝 Returning analysis with placeholder');
 
-      // If Imagen fails, try with Gemini 2.0 Flash which has native image generation
-      debugPrint('Imagen 3 failed, trying Gemini native image generation...');
-      return await _generateWithGeminiNative(
-        prompt,
-        userPhoto,
-        clothingDescription,
-      );
-    } catch (e) {
-      debugPrint('Imagen generation error: $e');
-      // Fallback to Gemini native
-      return await _generateWithGeminiNative(
-        'A person wearing $clothingDescription, fashion photography style',
-        userPhoto,
-        clothingDescription,
-      );
+      return {
+        'success': true,
+        'generatedImageBytes':
+            userPhoto, // Return original photo as placeholder
+        'prompt': prompt,
+        'isPlaceholder': true,
+        'message': 'AI analysis complete. Full image generation coming soon!',
+      };
+    } catch (e, stackTrace) {
+      debugPrint('❌ Try-on generation error: $e');
+      debugPrint('Stack trace: $stackTrace');
+      return {
+        'success': false,
+        'error': 'Unable to generate try-on preview: $e',
+        'generatedImageBytes': null,
+      };
     }
   }
 
