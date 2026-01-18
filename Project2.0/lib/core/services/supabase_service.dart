@@ -11,18 +11,25 @@ class SupabaseService {
     required String supabaseUrl,
     required String supabaseAnonKey,
   }) async {
-    if (_isInitialized) return;
+    if (_isInitialized) {
+      debugPrint('⚠️ Supabase already initialized');
+      return;
+    }
 
     try {
+      debugPrint('🔄 Initializing Supabase...');
+      debugPrint('URL: $supabaseUrl');
+
       await Supabase.initialize(
         url: supabaseUrl,
         anonKey: supabaseAnonKey,
       );
       _client = Supabase.instance.client;
       _isInitialized = true;
-      debugPrint('Supabase initialized successfully');
-    } catch (e) {
-      debugPrint('Failed to initialize Supabase: $e');
+      debugPrint('✅ Supabase initialized successfully');
+    } catch (e, stackTrace) {
+      debugPrint('❌ Failed to initialize Supabase: $e');
+      debugPrint('Stack trace: $stackTrace');
     }
   }
 
@@ -38,11 +45,13 @@ class SupabaseService {
     String contentType = 'image/jpeg',
   }) async {
     if (!_isInitialized || _client == null) {
-      debugPrint('Supabase not initialized');
+      debugPrint('❌ Supabase not initialized');
       return null;
     }
 
     try {
+      debugPrint('🔄 Uploading to Supabase: bucket=$bucket, path=$path');
+
       // Upload the image
       await _client!.storage.from(bucket).uploadBinary(
             path,
@@ -55,10 +64,11 @@ class SupabaseService {
 
       // Get the public URL
       final publicUrl = _client!.storage.from(bucket).getPublicUrl(path);
-      debugPrint('Image uploaded successfully: $publicUrl');
+      debugPrint('✅ Supabase upload successful: $publicUrl');
       return publicUrl;
-    } catch (e) {
-      debugPrint('Failed to upload image: $e');
+    } catch (e, stackTrace) {
+      debugPrint('❌ Failed to upload to Supabase: $e');
+      debugPrint('Stack trace: $stackTrace');
       return null;
     }
   }
