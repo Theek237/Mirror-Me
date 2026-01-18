@@ -95,8 +95,9 @@ class ImageStorageService {
     Future<String?> attemptUpload(FirebaseStorage storage) async {
       try {
         final ref = storage.ref('users/$userId/$folder/$fileName');
-        debugPrint('Attempting Firebase upload to: users/$userId/$folder/$fileName');
-        
+        debugPrint(
+            'Attempting Firebase upload to: users/$userId/$folder/$fileName');
+
         final uploadTask = ref.putData(
           imageBytes,
           SettableMetadata(
@@ -111,7 +112,7 @@ class ImageStorageService {
         // Wait for upload to complete
         final snapshot = await uploadTask;
         debugPrint('Upload state: ${snapshot.state}');
-        
+
         if (snapshot.state == TaskState.success) {
           final url = await ref.getDownloadURL();
           debugPrint('✅ Firebase upload successful: $url');
