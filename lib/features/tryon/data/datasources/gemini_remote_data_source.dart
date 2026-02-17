@@ -34,19 +34,61 @@ class GeminiRemoteDataSourceImpl implements GeminiRemoteDataSource {
     try {
       final prompt =
           customPrompt ??
-          '''You are an expert AI fashion assistant specializing in virtual try-on technology.
+          '''You are a professional AI virtual try-on engine specialized in photorealistic garment transfer and fashion visualization.
 
-TASK: Generate a photorealistic image showing the person from the first image (POSE IMAGE) wearing the clothing item from the second image (CLOTHING IMAGE).
+OBJECTIVE:
+Generate ONE ultra-photorealistic image of the person in the POSE IMAGE wearing the garment from the CLOTHING IMAGE.
 
-IMPORTANT INSTRUCTIONS:
-1. Preserve the exact pose, body position, background, and lighting from the POSE IMAGE
-2. Replace ONLY the relevant clothing on the person with the clothing from the CLOTHING IMAGE
-3. The clothing should fit naturally on the person's body
-4. Maintain the original person's face, skin tone, and body proportions
-5. Ensure the clothing looks realistic with proper shadows, wrinkles, and folds
-6. Keep the same image quality and resolution as the original pose image
+INPUTS:
+- POSE IMAGE: Contains the person, pose, body proportions, lighting, and background.
+- CLOTHING IMAGE: Contains the target garment to be applied.
 
-Generate ONE high-quality photorealistic result image.''';
+STRICT EXECUTION RULES:
+
+IDENTITY & BODY PRESERVATION:
+- Preserve the exact face, hairstyle, expression, skin tone, and body proportions of the person.
+- Do NOT modify body shape, weight, height, muscle tone, or facial features.
+- Do NOT beautify, stylize, or alter identity in any way.
+
+POSE & SCENE PRESERVATION:
+- Maintain 100% of the original pose.
+- Keep the original background unchanged.
+- Preserve camera angle, perspective, focal length, and framing.
+- Maintain original lighting direction, intensity, shadows, and color temperature.
+
+GARMENT TRANSFER RULES:
+- Replace ONLY the relevant clothing region.
+- Do NOT alter non-target clothing items.
+- The garment must follow natural body contours.
+- Apply realistic fabric physics: folds, tension, stretching, gravity, and compression.
+- Respect fabric type (denim, cotton, silk, knit, etc.) and reflect its texture accordingly.
+- Preserve garment details: logos, prints, stitching, buttons, zippers, seams.
+
+FIT & ALIGNMENT:
+- Ensure anatomically correct alignment at shoulders, sleeves, neckline, waist, and hips.
+- Avoid floating fabric, clipping, distortion, or unnatural stretching.
+- Ensure proper sleeve length, garment length, and proportional scaling.
+
+REALISM ENFORCEMENT:
+- Match lighting and shadows between body and garment.
+- Add realistic shading, occlusion, and depth.
+- Ensure natural wrinkles at joints (elbows, waist, underarms).
+- Maintain consistent resolution and sharpness with the POSE IMAGE.
+- No blur, no artifacts, no texture melting.
+
+PROHIBITED OUTPUTS:
+- No stylized, cartoon, painted, or AI-art look.
+- No body reshaping.
+- No background modification.
+- No multiple outputs.
+- No extra garments.
+- No duplicated limbs or fabric glitches.
+
+OUTPUT REQUIREMENT:
+Generate exactly ONE high-resolution photorealistic image that looks like a real photograph taken of the person naturally wearing the garment.
+
+The result must be indistinguishable from an authentic camera photograph.
+''';
 
       // Convert images to base64
       final poseImageBase64 = base64Encode(poseImageBytes);
