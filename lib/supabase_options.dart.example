@@ -1,0 +1,15 @@
+/// Supabase configuration options.
+///
+/// Setup:
+/// 1. Copy this file to `supabase_options.dart` in the same directory
+/// 2. Replace the placeholder values with your Supabase project credentials
+/// 3. Get values from: Supabase Dashboard > Project Settings > API
+///
+/// IMPORTANT: Never commit `supabase_options.dart` to version control.
+class SupabaseOptions {
+  /// Your Supabase project URL
+  static const String url = 'https://YOUR_PROJECT_ID.supabase.co';
+
+  /// Your Supabase anon/public key (safe for client-side use)
+  static const String anonKey = 'YOUR_SUPABASE_ANON_KEY';
+}

@@ -1,0 +1,20 @@
+/// Configuration for AI services
+///
+/// Setup:
+/// 1. Copy this file to `gemini_config.dart` in the same directory
+/// 2. Replace `YOUR_API_KEY_HERE` with your actual API key
+/// 3. Get a key at: https://aistudio.google.com/apikey
+///
+/// IMPORTANT: Never commit `gemini_config.dart` to version control.
+class GeminiConfig {
+  /// Your Gemini API Key
+  static const String apiKey = 'YOUR_API_KEY_HERE';
+
+  /// Model for image generation (Virtual Try-On)
+  /// Options: 'gemini-2.5-flash-image', 'gemini-2.0-flash-exp'
+  static const String imageModel = 'gemini-2.5-flash-image';
+
+  /// Model for text-based AI Recommendations
+  /// Options: 'gemini-2.0-flash', 'gemini-1.5-pro', 'gemini-1.5-flash'
+  static const String recommendationModel = 'gemini-2.0-flash';
+}
