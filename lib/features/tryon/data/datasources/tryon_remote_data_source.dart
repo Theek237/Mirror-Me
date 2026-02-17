@@ -68,8 +68,8 @@ class TryOnRemoteDataSourceImpl implements TryOnRemoteDataSource {
           .from('tryon_results')
           .insert({
             'user_id': userId,
-            'pose_image_url': poseImageUrl,
-            'clothing_image_url': clothingImageUrl,
+            'user_image_url': poseImageUrl,
+            'cloth_image_url': clothingImageUrl,
             'result_image_url': resultImageUrl,
             'prompt': prompt,
           })

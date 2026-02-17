@@ -82,3 +82,12 @@ class TryOnToggleFavoriteEvent extends TryOnEvent {
 class TryOnResetEvent extends TryOnEvent {
   const TryOnResetEvent();
 }
+
+class TryOnDeleteEvent extends TryOnEvent {
+  final String resultId;
+
+  const TryOnDeleteEvent({required this.resultId});
+
+  @override
+  List<Object> get props => [resultId];
+}

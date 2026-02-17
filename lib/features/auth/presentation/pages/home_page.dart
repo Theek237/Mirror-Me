@@ -8,6 +8,7 @@ import 'package:mm/features/gallery/presentation/pages/gallery_page.dart';
 import 'package:mm/features/gallery/presentation/bloc/gallery_bloc.dart';
 import 'package:mm/features/tryon/presentation/pages/tryon_page.dart';
 import 'package:mm/features/tryon/presentation/bloc/tryon_bloc.dart';
+import 'package:mm/features/tryon/presentation/pages/generated_images_page.dart';
 import 'package:mm/features/recommendations/presentation/pages/recommendations_page.dart';
 import 'package:mm/features/recommendations/presentation/bloc/recommendation_bloc.dart';
 import 'package:mm/injection_container.dart' as di;
@@ -171,44 +172,59 @@ class HomePage extends StatelessWidget {
                 SliverToBoxAdapter(
                   child: Padding(
                     padding: const EdgeInsets.symmetric(horizontal: 24),
-                    child: Row(
+                    child: Column(
                       children: [
-                        Expanded(
-                          child: _buildCollectionCard(
-                            context,
-                            title: "Wardrobe",
-                            subtitle: "Manage clothes",
-                            icon: Icons.checkroom_rounded,
-                            color: AppTheme.primaryColor,
-                            onTap: () {
-                              Navigator.push(
+                        Row(
+                          children: [
+                            Expanded(
+                              child: _buildCollectionCard(
                                 context,
-                                MaterialPageRoute(
-                                  builder: (context) =>
-                                      WardrobePage(userId: user.uid),
-                                ),
-                              );
-                            },
-                          ),
+                                title: "Wardrobe",
+                                subtitle: "Manage clothes",
+                                icon: Icons.checkroom_rounded,
+                                color: AppTheme.primaryColor,
+                                onTap: () {
+                                  Navigator.push(
+                                    context,
+                                    MaterialPageRoute(
+                                      builder: (context) =>
+                                          WardrobePage(userId: user.uid),
+                                    ),
+                                  );
+                                },
+                              ),
+                            ),
+                            const SizedBox(width: 16),
+                            Expanded(
+                              child: _buildCollectionCard(
+                                context,
+                                title: "Gallery",
+                                subtitle: "Your photos",
+                                icon: Icons.photo_library_rounded,
+                                color: AppTheme.secondaryColor,
+                                onTap: () {
+                                  Navigator.push(
+                                    context,
+                                    MaterialPageRoute(
+                                      builder: (context) =>
+                                          GalleryPage(userId: user.uid),
+                                    ),
+                                  );
+                                },
+                              ),
+                            ),
+                          ],
                         ),
-                        const SizedBox(width: 16),
-                        Expanded(
-                          child: _buildCollectionCard(
-                            context,
-                            title: "Gallery",
-                            subtitle: "Your photos",
-                            icon: Icons.photo_library_rounded,
-                            color: AppTheme.secondaryColor,
-                            onTap: () {
-                              Navigator.push(
-                                context,
-                                MaterialPageRoute(
-                                  builder: (context) =>
-                                      GalleryPage(userId: user.uid),
-                                ),
-                              );
-                            },
-                          ),
+                        const SizedBox(height: 16),
+                        // Generated Images Card - full width
+                        _buildCollectionCard(
+                          context,
+                          title: "Generated Images",
+                          subtitle: "Your AI try-on results",
+                          icon: Icons.auto_fix_high_rounded,
+                          color: const Color(0xFF8B5CF6),
+                          onTap: () =>
+                              _navigateToGeneratedImages(context, user.uid),
                         ),
                       ],
                     ),
@@ -286,7 +302,8 @@ class HomePage extends StatelessWidget {
                           title: "Favorite Looks",
                           subtitle: "View your saved try-on results",
                           color: const Color(0xFFEF4444),
-                          onTap: () => _navigateToTryOn(context, user.uid),
+                          onTap: () =>
+                              _navigateToGeneratedImages(context, user.uid),
                         ),
                       ],
                     ),
@@ -591,6 +608,18 @@ class HomePage extends StatelessWidget {
             BlocProvider(create: (_) => di.sl<TryOnBloc>()),
           ],
           child: RecommendationsPage(userId: userId),
+        ),
+      ),
+    );
+  }
+
+  void _navigateToGeneratedImages(BuildContext context, String userId) {
+    Navigator.push(
+      context,
+      MaterialPageRoute(
+        builder: (context) => BlocProvider(
+          create: (_) => di.sl<TryOnBloc>(),
+          child: GeneratedImagesPage(userId: userId),
         ),
       ),
     );

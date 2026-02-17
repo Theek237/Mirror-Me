@@ -7,10 +7,11 @@
 CREATE TABLE IF NOT EXISTS public.tryon_results (
     id UUID DEFAULT gen_random_uuid() PRIMARY KEY,
     user_id UUID NOT NULL REFERENCES auth.users(id) ON DELETE CASCADE,
-    pose_image_url TEXT NOT NULL,
-    clothing_image_url TEXT NOT NULL,
+    user_image_url TEXT NOT NULL,
+    cloth_image_url TEXT NOT NULL,
     result_image_url TEXT NOT NULL,
     prompt TEXT,
+    is_favorite BOOLEAN DEFAULT false,
     created_at TIMESTAMP WITH TIME ZONE DEFAULT NOW()
 );
 
@@ -20,6 +21,7 @@ ALTER TABLE public.tryon_results ENABLE ROW LEVEL SECURITY;
 -- 3. Create RLS policies for tryon_results table
 DROP POLICY IF EXISTS "Users can view own tryon results" ON public.tryon_results;
 DROP POLICY IF EXISTS "Users can insert own tryon results" ON public.tryon_results;
+DROP POLICY IF EXISTS "Users can update own tryon results" ON public.tryon_results;
 DROP POLICY IF EXISTS "Users can delete own tryon results" ON public.tryon_results;
 
 CREATE POLICY "Users can view own tryon results" ON public.tryon_results
@@ -28,12 +30,16 @@ CREATE POLICY "Users can view own tryon results" ON public.tryon_results
 CREATE POLICY "Users can insert own tryon results" ON public.tryon_results
     FOR INSERT WITH CHECK (auth.uid() = user_id);
 
+CREATE POLICY "Users can update own tryon results" ON public.tryon_results
+    FOR UPDATE USING (auth.uid() = user_id);
+
 CREATE POLICY "Users can delete own tryon results" ON public.tryon_results
     FOR DELETE USING (auth.uid() = user_id);
 
 -- 4. Create indexes
 CREATE INDEX IF NOT EXISTS idx_tryon_results_user_id ON public.tryon_results(user_id);
 CREATE INDEX IF NOT EXISTS idx_tryon_results_created_at ON public.tryon_results(created_at DESC);
+CREATE INDEX IF NOT EXISTS idx_tryon_results_is_favorite ON public.tryon_results(is_favorite);
 
 -- ================================================
 -- STORAGE BUCKET SETUP FOR TRY-ON

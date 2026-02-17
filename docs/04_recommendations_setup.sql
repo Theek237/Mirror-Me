@@ -44,8 +44,8 @@ CREATE INDEX IF NOT EXISTS idx_tryon_results_is_favorite ON tryon_results(is_fav
 CREATE TABLE IF NOT EXISTS tryon_results (
     id UUID DEFAULT gen_random_uuid() PRIMARY KEY,
     user_id UUID NOT NULL REFERENCES auth.users(id) ON DELETE CASCADE,
-    pose_image_url TEXT NOT NULL,
-    clothing_image_url TEXT NOT NULL,
+    user_image_url TEXT NOT NULL,
+    cloth_image_url TEXT NOT NULL,
     result_image_url TEXT NOT NULL,
     prompt TEXT,
     is_favorite BOOLEAN DEFAULT false,

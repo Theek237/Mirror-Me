@@ -6,6 +6,7 @@ import 'package:mm/features/tryon/domain/usecases/generate_tryon.dart';
 import 'package:mm/features/tryon/domain/usecases/get_tryon_results.dart';
 import 'package:mm/features/tryon/domain/usecases/save_tryon_result.dart';
 import 'package:mm/features/tryon/domain/usecases/toggle_tryon_favorite.dart';
+import 'package:mm/features/tryon/domain/usecases/delete_tryon_result.dart';
 
 part 'tryon_event.dart';
 part 'tryon_state.dart';
@@ -15,17 +16,20 @@ class TryOnBloc extends Bloc<TryOnEvent, TryOnState> {
   final SaveTryOnResult saveTryOnResult;
   final GetTryOnResults getTryOnResults;
   final ToggleTryOnFavorite toggleTryOnFavorite;
+  final DeleteTryOnResult deleteTryOnResult;
 
   TryOnBloc({
     required this.generateTryOn,
     required this.saveTryOnResult,
     required this.getTryOnResults,
     required this.toggleTryOnFavorite,
+    required this.deleteTryOnResult,
   }) : super(const TryOnInitialState()) {
     on<TryOnGenerateEvent>(_onGenerate);
     on<TryOnSaveResultEvent>(_onSaveResult);
     on<TryOnLoadResultsEvent>(_onLoadResults);
     on<TryOnToggleFavoriteEvent>(_onToggleFavorite);
+    on<TryOnDeleteEvent>(_onDelete);
     on<TryOnResetEvent>(_onReset);
   }
 
@@ -104,5 +108,19 @@ class TryOnBloc extends Bloc<TryOnEvent, TryOnState> {
 
   void _onReset(TryOnResetEvent event, Emitter<TryOnState> emit) {
     emit(const TryOnInitialState());
+  }
+
+  Future<void> _onDelete(
+    TryOnDeleteEvent event,
+    Emitter<TryOnState> emit,
+  ) async {
+    emit(const TryOnLoadingState(message: 'Deleting...'));
+
+    final result = await deleteTryOnResult(event.resultId);
+
+    result.fold(
+      (failure) => emit(TryOnErrorState(message: failure.message)),
+      (_) => emit(TryOnDeletedState(resultId: event.resultId)),
+    );
   }
 }
