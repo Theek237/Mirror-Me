@@ -196,45 +196,50 @@ class _RecommendationsPageState extends State<RecommendationsPage>
 
   Widget _buildGeneratingView() {
     return Center(
-      child: Column(
-        mainAxisAlignment: MainAxisAlignment.center,
-        children: [
-          Container(
-            padding: const EdgeInsets.all(24),
-            decoration: BoxDecoration(
-              color: AppTheme.accentColor,
-              borderRadius: BorderRadius.circular(20),
+      child: Padding(
+        padding: const EdgeInsets.symmetric(horizontal: 32),
+        child: Column(
+          mainAxisAlignment: MainAxisAlignment.center,
+          children: [
+            ClipRRect(
+              borderRadius: BorderRadius.circular(24),
+              child: Image.asset(
+                'lib/features/recommendations/presentation/assets/recommendation.jpg',
+                width: 240,
+                height: 240,
+                fit: BoxFit.cover,
+              ),
             ),
-            child: const Icon(
-              Icons.auto_awesome,
-              size: 48,
-              color: AppTheme.primaryColor,
+            const SizedBox(height: 32),
+            const Text(
+              "Styling your outfit...",
+              style: TextStyle(
+                fontSize: 22,
+                fontWeight: FontWeight.w700,
+                color: AppTheme.primaryColor,
+              ),
             ),
-          ),
-          const SizedBox(height: 24),
-          const Text(
-            "Analyzing your outfit...",
-            style: TextStyle(
-              fontSize: 20,
-              fontWeight: FontWeight.w600,
-              color: AppTheme.primaryColor,
+            const SizedBox(height: 8),
+            Text(
+              "Our AI stylist is crafting recommendations just for you",
+              textAlign: TextAlign.center,
+              style: TextStyle(
+                fontSize: 14,
+                color: AppTheme.textSecondary,
+                height: 1.4,
+              ),
             ),
-          ),
-          const SizedBox(height: 8),
-          Text(
-            "AI is crafting personalized recommendations",
-            style: TextStyle(fontSize: 14, color: AppTheme.textSecondary),
-          ),
-          const SizedBox(height: 32),
-          const SizedBox(
-            width: 48,
-            height: 48,
-            child: CircularProgressIndicator(
-              strokeWidth: 3,
-              color: AppTheme.secondaryColor,
+            const SizedBox(height: 28),
+            const SizedBox(
+              width: 36,
+              height: 36,
+              child: CircularProgressIndicator(
+                strokeWidth: 3,
+                color: Color(0xFFE94560),
+              ),
             ),
-          ),
-        ],
+          ],
+        ),
       ),
     );
   }

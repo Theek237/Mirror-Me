@@ -3,6 +3,7 @@ import 'package:flutter/material.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
 import 'package:cached_network_image/cached_network_image.dart';
 import 'package:http/http.dart' as http;
+import 'package:gal/gal.dart';
 import 'package:mm/core/theme/app_theme.dart';
 import 'package:mm/features/tryon/presentation/bloc/tryon_bloc.dart';
 import 'package:mm/features/gallery/data/models/user_image_model.dart';
@@ -23,6 +24,10 @@ class _TryOnPageState extends State<TryOnPage> {
   UserImageModel? _selectedPose;
   ClothingItemModel? _selectedClothing;
   Uint8List? _generatedResult;
+  bool _isSaved = false;
+  bool _isSaving = false;
+  String? _saveError;
+  bool _isSavingToGallery = false;
 
   @override
   void initState() {
@@ -96,7 +101,11 @@ class _TryOnPageState extends State<TryOnPage> {
   }
 
   void _saveResult() {
-    if (_generatedResult == null) return;
+    if (_generatedResult == null || _isSaved || _isSaving) return;
+
+    setState(() {
+      _isSaving = true;
+    });
 
     context.read<TryOnBloc>().add(
       TryOnSaveResultEvent(
@@ -106,6 +115,53 @@ class _TryOnPageState extends State<TryOnPage> {
         resultImageBytes: _generatedResult!,
       ),
     );
+  }
+
+  Future<void> _saveToGallery() async {
+    if (_generatedResult == null || _isSavingToGallery) return;
+
+    setState(() {
+      _isSavingToGallery = true;
+    });
+
+    try {
+      await Gal.putImageBytes(
+        _generatedResult!,
+        album: 'Mirror Me',
+      );
+
+      if (mounted) {
+        ScaffoldMessenger.of(context).showSnackBar(
+          SnackBar(
+            content: const Text('Image saved to gallery!'),
+            backgroundColor: Colors.green.shade600,
+            behavior: SnackBarBehavior.floating,
+            shape: RoundedRectangleBorder(
+              borderRadius: BorderRadius.circular(10),
+            ),
+          ),
+        );
+      }
+    } catch (e) {
+      if (mounted) {
+        ScaffoldMessenger.of(context).showSnackBar(
+          SnackBar(
+            content: Text('Failed to save to gallery: $e'),
+            backgroundColor: AppTheme.secondaryColor,
+            behavior: SnackBarBehavior.floating,
+            shape: RoundedRectangleBorder(
+              borderRadius: BorderRadius.circular(10),
+            ),
+          ),
+        );
+      }
+    } finally {
+      if (mounted) {
+        setState(() {
+          _isSavingToGallery = false;
+        });
+      }
+    }
   }
 
   @override
@@ -124,8 +180,17 @@ class _TryOnPageState extends State<TryOnPage> {
                   if (state is TryOnGeneratedState) {
                     setState(() {
                       _generatedResult = state.resultImageBytes;
+                      _isSaved = false;
+                      _saveError = null;
                     });
+                    // Auto-save to generated images collection
+                    _saveResult();
                   } else if (state is TryOnSavedState) {
+                    setState(() {
+                      _isSaved = true;
+                      _isSaving = false;
+                      _saveError = null;
+                    });
                     ScaffoldMessenger.of(context).showSnackBar(
                       SnackBar(
                         content: const Text('Result saved successfully!'),
@@ -137,6 +202,13 @@ class _TryOnPageState extends State<TryOnPage> {
                       ),
                     );
                   } else if (state is TryOnErrorState) {
+                    // If we were auto-saving and it failed, record error but keep the image
+                    if (_isSaving) {
+                      setState(() {
+                        _isSaving = false;
+                        _saveError = state.message;
+                      });
+                    }
                     ScaffoldMessenger.of(context).showSnackBar(
                       SnackBar(
                         content: Text(state.message),
@@ -207,6 +279,9 @@ class _TryOnPageState extends State<TryOnPage> {
                   _generatedResult = null;
                   _selectedPose = null;
                   _selectedClothing = null;
+                  _isSaved = false;
+                  _isSaving = false;
+                  _saveError = null;
                 });
                 context.read<TryOnBloc>().add(const TryOnResetEvent());
               },
@@ -230,52 +305,55 @@ class _TryOnPageState extends State<TryOnPage> {
 
   Widget _buildGeneratingView() {
     return Center(
-      child: Column(
-        mainAxisAlignment: MainAxisAlignment.center,
-        children: [
-          Container(
-            padding: const EdgeInsets.all(24),
-            decoration: BoxDecoration(
-              color: AppTheme.accentColor,
-              borderRadius: BorderRadius.circular(20),
+      child: Padding(
+        padding: const EdgeInsets.symmetric(horizontal: 32),
+        child: Column(
+          mainAxisAlignment: MainAxisAlignment.center,
+          children: [
+            ClipRRect(
+              borderRadius: BorderRadius.circular(24),
+              child: Image.asset(
+                'lib/features/tryon/presentation/assets/tryon.jpg',
+                width: 240,
+                height: 240,
+                fit: BoxFit.cover,
+              ),
             ),
-            child: const Icon(
-              Icons.auto_fix_high_rounded,
-              size: 48,
-              color: AppTheme.primaryColor,
+            const SizedBox(height: 32),
+            const Text(
+              "Creating your look...",
+              style: TextStyle(
+                fontSize: 22,
+                fontWeight: FontWeight.w700,
+                color: AppTheme.primaryColor,
+              ),
             ),
-          ),
-          const SizedBox(height: 24),
-          const Text(
-            "Creating your look...",
-            style: TextStyle(
-              fontSize: 20,
-              fontWeight: FontWeight.w600,
-              color: AppTheme.primaryColor,
+            const SizedBox(height: 8),
+            Text(
+              "Our AI is dressing you up — hang tight!",
+              textAlign: TextAlign.center,
+              style: TextStyle(
+                fontSize: 14,
+                color: AppTheme.textSecondary,
+                height: 1.4,
+              ),
             ),
-          ),
-          const SizedBox(height: 8),
-          Text(
-            "AI is working its magic",
-            style: TextStyle(fontSize: 14, color: AppTheme.textSecondary),
-          ),
-          const SizedBox(height: 32),
-          const SizedBox(
-            width: 48,
-            height: 48,
-            child: CircularProgressIndicator(
-              strokeWidth: 3,
-              color: AppTheme.secondaryColor,
+            const SizedBox(height: 28),
+            const SizedBox(
+              width: 36,
+              height: 36,
+              child: CircularProgressIndicator(
+                strokeWidth: 3,
+                color: Color(0xFF6C63FF),
+              ),
             ),
-          ),
-        ],
+          ],
+        ),
       ),
     );
   }
 
   Widget _buildResultView(TryOnState state) {
-    final isLoading = state is TryOnLoadingState;
-
     return SingleChildScrollView(
       padding: const EdgeInsets.fromLTRB(20, 0, 20, 20),
       child: Column(
@@ -302,7 +380,12 @@ class _TryOnPageState extends State<TryOnPage> {
             ),
           ),
 
-          const SizedBox(height: 24),
+          const SizedBox(height: 12),
+
+          // Auto-save status indicator
+          _buildSaveStatusIndicator(),
+
+          const SizedBox(height: 16),
 
           // Source Images Preview
           Row(
@@ -325,7 +408,7 @@ class _TryOnPageState extends State<TryOnPage> {
             ],
           ),
 
-          const SizedBox(height: 32),
+          const SizedBox(height: 24),
 
           // Action Buttons
           Row(
@@ -335,6 +418,9 @@ class _TryOnPageState extends State<TryOnPage> {
                   onPressed: () {
                     setState(() {
                       _generatedResult = null;
+                      _isSaved = false;
+                      _isSaving = false;
+                      _saveError = null;
                     });
                     context.read<TryOnBloc>().add(const TryOnResetEvent());
                   },
@@ -353,8 +439,8 @@ class _TryOnPageState extends State<TryOnPage> {
               const SizedBox(width: 16),
               Expanded(
                 child: ElevatedButton.icon(
-                  onPressed: isLoading ? null : _saveResult,
-                  icon: isLoading
+                  onPressed: _isSavingToGallery ? null : _saveToGallery,
+                  icon: _isSavingToGallery
                       ? const SizedBox(
                           width: 20,
                           height: 20,
@@ -363,8 +449,10 @@ class _TryOnPageState extends State<TryOnPage> {
                             color: Colors.white,
                           ),
                         )
-                      : const Icon(Icons.save_alt, color: Colors.white),
-                  label: Text(isLoading ? "Saving..." : "Save Result"),
+                      : const Icon(Icons.download_rounded, color: Colors.white),
+                  label: Text(
+                    _isSavingToGallery ? "Saving..." : "Save to Gallery",
+                  ),
                   style: ElevatedButton.styleFrom(
                     padding: const EdgeInsets.symmetric(vertical: 16),
                     backgroundColor: AppTheme.primaryColor,
@@ -380,6 +468,95 @@ class _TryOnPageState extends State<TryOnPage> {
         ],
       ),
     );
+  }
+
+  Widget _buildSaveStatusIndicator() {
+    if (_isSaving) {
+      return Container(
+        padding: const EdgeInsets.symmetric(horizontal: 14, vertical: 8),
+        decoration: BoxDecoration(
+          color: Colors.blue.shade50,
+          borderRadius: BorderRadius.circular(10),
+        ),
+        child: Row(
+          mainAxisSize: MainAxisSize.min,
+          children: [
+            SizedBox(
+              width: 14,
+              height: 14,
+              child: CircularProgressIndicator(
+                strokeWidth: 2,
+                color: Colors.blue.shade600,
+              ),
+            ),
+            const SizedBox(width: 8),
+            Text(
+              'Saving to collection...',
+              style: TextStyle(
+                fontSize: 12,
+                color: Colors.blue.shade700,
+                fontWeight: FontWeight.w500,
+              ),
+            ),
+          ],
+        ),
+      );
+    }
+
+    if (_saveError != null) {
+      return GestureDetector(
+        onTap: _saveResult,
+        child: Container(
+          padding: const EdgeInsets.symmetric(horizontal: 14, vertical: 8),
+          decoration: BoxDecoration(
+            color: Colors.red.shade50,
+            borderRadius: BorderRadius.circular(10),
+          ),
+          child: Row(
+            mainAxisSize: MainAxisSize.min,
+            children: [
+              Icon(Icons.error_outline, size: 14, color: Colors.red.shade600),
+              const SizedBox(width: 8),
+              Text(
+                'Save failed. Tap to retry.',
+                style: TextStyle(
+                  fontSize: 12,
+                  color: Colors.red.shade700,
+                  fontWeight: FontWeight.w500,
+                ),
+              ),
+            ],
+          ),
+        ),
+      );
+    }
+
+    if (_isSaved) {
+      return Container(
+        padding: const EdgeInsets.symmetric(horizontal: 14, vertical: 8),
+        decoration: BoxDecoration(
+          color: Colors.green.shade50,
+          borderRadius: BorderRadius.circular(10),
+        ),
+        child: Row(
+          mainAxisSize: MainAxisSize.min,
+          children: [
+            Icon(Icons.check_circle, size: 14, color: Colors.green.shade600),
+            const SizedBox(width: 8),
+            Text(
+              'Saved to collection',
+              style: TextStyle(
+                fontSize: 12,
+                color: Colors.green.shade700,
+                fontWeight: FontWeight.w500,
+              ),
+            ),
+          ],
+        ),
+      );
+    }
+
+    return const SizedBox.shrink();
   }
 
   Widget _buildSourcePreview({required String label, String? imageUrl}) {

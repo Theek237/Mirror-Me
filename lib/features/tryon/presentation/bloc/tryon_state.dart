@@ -74,3 +74,12 @@ class TryOnErrorState extends TryOnState {
   @override
   List<Object> get props => [message];
 }
+
+class TryOnDeletedState extends TryOnState {
+  final String resultId;
+
+  const TryOnDeletedState({required this.resultId});
+
+  @override
+  List<Object> get props => [resultId];
+}

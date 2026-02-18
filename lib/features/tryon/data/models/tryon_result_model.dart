@@ -16,10 +16,10 @@ class TryOnResultModel extends TryOnResult {
     return TryOnResultModel(
       id: json['id'] as String,
       userId: json['user_id'] as String,
-      poseImageUrl: json['pose_image_url'] as String,
-      clothingImageUrl: json['clothing_image_url'] as String,
+      poseImageUrl: json['user_image_url'] as String,
+      clothingImageUrl: json['cloth_image_url'] as String,
       resultImageUrl: json['result_image_url'] as String,
-      prompt: json['prompt'] as String?,
+      prompt: json['prompt'] as String? ?? '',
       isFavorite: json['is_favorite'] as bool? ?? false,
       createdAt: DateTime.parse(json['created_at'] as String),
     );
@@ -29,31 +29,12 @@ class TryOnResultModel extends TryOnResult {
     return {
       'id': id,
       'user_id': userId,
-      'pose_image_url': poseImageUrl,
-      'clothing_image_url': clothingImageUrl,
+      'user_image_url': poseImageUrl,
+      'cloth_image_url': clothingImageUrl,
       'result_image_url': resultImageUrl,
       'prompt': prompt,
       'is_favorite': isFavorite,
       'created_at': createdAt.toIso8601String(),
-    };
-  }
-
-  /// Creates a model for inserting into database (without id and created_at)
-  static Map<String, dynamic> toInsertJson({
-    required String userId,
-    required String poseImageUrl,
-    required String clothingImageUrl,
-    required String resultImageUrl,
-    String? prompt,
-    bool isFavorite = false,
-  }) {
-    return {
-      'user_id': userId,
-      'pose_image_url': poseImageUrl,
-      'clothing_image_url': clothingImageUrl,
-      'result_image_url': resultImageUrl,
-      'prompt': prompt,
-      'is_favorite': isFavorite,
     };
   }
 

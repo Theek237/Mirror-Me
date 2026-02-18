@@ -25,6 +25,7 @@ import 'package:mm/features/tryon/domain/usecases/generate_tryon.dart';
 import 'package:mm/features/tryon/domain/usecases/get_tryon_results.dart';
 import 'package:mm/features/tryon/domain/usecases/save_tryon_result.dart';
 import 'package:mm/features/tryon/domain/usecases/toggle_tryon_favorite.dart';
+import 'package:mm/features/tryon/domain/usecases/delete_tryon_result.dart';
 import 'package:mm/features/tryon/presentation/bloc/tryon_bloc.dart';
 import 'package:mm/features/recommendations/data/datasources/recommendation_remote_data_source.dart';
 import 'package:mm/features/recommendations/data/datasources/recommendation_supabase_data_source.dart';
@@ -109,6 +110,7 @@ Future<void> init() async {
       saveTryOnResult: sl(),
       getTryOnResults: sl(),
       toggleTryOnFavorite: sl(),
+      deleteTryOnResult: sl(),
     ),
   );
 
@@ -117,6 +119,7 @@ Future<void> init() async {
   sl.registerLazySingleton(() => SaveTryOnResult(sl()));
   sl.registerLazySingleton(() => GetTryOnResults(sl()));
   sl.registerLazySingleton(() => ToggleTryOnFavorite(sl()));
+  sl.registerLazySingleton(() => DeleteTryOnResult(sl()));
 
   //Repository
   sl.registerLazySingleton<TryOnRepository>(
