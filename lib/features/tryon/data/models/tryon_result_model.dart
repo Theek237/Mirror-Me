@@ -19,7 +19,7 @@ class TryOnResultModel extends TryOnResult {
       poseImageUrl: json['user_image_url'] as String,
       clothingImageUrl: json['cloth_image_url'] as String,
       resultImageUrl: json['result_image_url'] as String,
-      prompt: json['prompt'] as String?,
+      prompt: json['prompt'] as String? ?? '',
       isFavorite: json['is_favorite'] as bool? ?? false,
       createdAt: DateTime.parse(json['created_at'] as String),
     );

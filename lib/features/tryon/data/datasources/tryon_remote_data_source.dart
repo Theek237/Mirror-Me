@@ -71,7 +71,6 @@ class TryOnRemoteDataSourceImpl implements TryOnRemoteDataSource {
             'user_image_url': poseImageUrl,
             'cloth_image_url': clothingImageUrl,
             'result_image_url': resultImageUrl,
-            'prompt': prompt,
           })
           .select()
           .single();

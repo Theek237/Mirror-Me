@@ -103,6 +103,10 @@ class _TryOnPageState extends State<TryOnPage> {
   void _saveResult() {
     if (_generatedResult == null || _isSaved || _isSaving) return;
 
+    setState(() {
+      _isSaving = true;
+    });
+
     context.read<TryOnBloc>().add(
       TryOnSaveResultEvent(
         userId: widget.userId,
@@ -177,7 +181,6 @@ class _TryOnPageState extends State<TryOnPage> {
                     setState(() {
                       _generatedResult = state.resultImageBytes;
                       _isSaved = false;
-                      _isSaving = true;
                       _saveError = null;
                     });
                     // Auto-save to generated images collection
@@ -302,45 +305,50 @@ class _TryOnPageState extends State<TryOnPage> {
 
   Widget _buildGeneratingView() {
     return Center(
-      child: Column(
-        mainAxisAlignment: MainAxisAlignment.center,
-        children: [
-          Container(
-            padding: const EdgeInsets.all(24),
-            decoration: BoxDecoration(
-              color: AppTheme.accentColor,
-              borderRadius: BorderRadius.circular(20),
+      child: Padding(
+        padding: const EdgeInsets.symmetric(horizontal: 32),
+        child: Column(
+          mainAxisAlignment: MainAxisAlignment.center,
+          children: [
+            ClipRRect(
+              borderRadius: BorderRadius.circular(24),
+              child: Image.asset(
+                'lib/features/tryon/presentation/assets/tryon.jpg',
+                width: 240,
+                height: 240,
+                fit: BoxFit.cover,
+              ),
             ),
-            child: const Icon(
-              Icons.auto_fix_high_rounded,
-              size: 48,
-              color: AppTheme.primaryColor,
+            const SizedBox(height: 32),
+            const Text(
+              "Creating your look...",
+              style: TextStyle(
+                fontSize: 22,
+                fontWeight: FontWeight.w700,
+                color: AppTheme.primaryColor,
+              ),
             ),
-          ),
-          const SizedBox(height: 24),
-          const Text(
-            "Creating your look...",
-            style: TextStyle(
-              fontSize: 20,
-              fontWeight: FontWeight.w600,
-              color: AppTheme.primaryColor,
+            const SizedBox(height: 8),
+            Text(
+              "Our AI is dressing you up — hang tight!",
+              textAlign: TextAlign.center,
+              style: TextStyle(
+                fontSize: 14,
+                color: AppTheme.textSecondary,
+                height: 1.4,
+              ),
             ),
-          ),
-          const SizedBox(height: 8),
-          Text(
-            "AI is working its magic",
-            style: TextStyle(fontSize: 14, color: AppTheme.textSecondary),
-          ),
-          const SizedBox(height: 32),
-          const SizedBox(
-            width: 48,
-            height: 48,
-            child: CircularProgressIndicator(
-              strokeWidth: 3,
-              color: AppTheme.secondaryColor,
+            const SizedBox(height: 28),
+            const SizedBox(
+              width: 36,
+              height: 36,
+              child: CircularProgressIndicator(
+                strokeWidth: 3,
+                color: Color(0xFF6C63FF),
+              ),
             ),
-          ),
-        ],
+          ],
+        ),
       ),
     );
   }

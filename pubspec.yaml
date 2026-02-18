@@ -46,3 +46,10 @@ dev_dependencies:
 
 flutter:
   uses-material-design: true
+  assets:
+    - lib/core/assets/
+    - lib/features/tryon/presentation/assets/
+    - lib/features/recommendations/presentation/assets/
+    - lib/features/auth/presentation/assets/
+
+
